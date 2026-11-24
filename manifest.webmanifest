@@ -1,0 +1,20 @@
+{
+  "name": "Quản Lý Kẹp Chì Đầu Máy",
+  "short_name": "Kẹp Chì",
+  "description": "Quản lý niêm phong kẹp chì đầu máy, lưu trên máy và đồng bộ đám mây",
+  "lang": "vi",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#312e81",
+  "theme_color": "#312e81",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
