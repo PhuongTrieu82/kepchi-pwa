@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Quản Lý Kẹp Chì Đầu Máy v16.3</title>
+    <title>Quản Lý Kẹp Chì Đầu Máy v16.4</title>
     <meta name="author" content="Triệu Việt Phương">
     <meta name="copyright" content="© 2026 Triệu Việt Phương. All rights reserved.">
     <meta name="theme-color" content="#312e81">
@@ -14,7 +14,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Kẹp Chì">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="application-version" content="15.47">
+    <meta name="application-version" content="16.4">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -242,7 +242,7 @@
                 <span class="text-xl">🛡️</span>
                 <div>
                     <h1 class="text-sm md:text-lg font-bold leading-tight">QUẢN LÝ KẸP CHÌ ĐẦU MÁY</h1>
-                    <p class="text-[10px] text-indigo-200">v16.3 - Lưu ổ cứng & Đám mây</p>
+                    <p class="text-[10px] text-indigo-200">v16.4 - Lưu ổ cứng & Đám mây</p>
                 </div>
             </div>
             <div class="flex items-center gap-1.5">
@@ -470,7 +470,7 @@
     </main>
 
     <footer class="bg-white border-t py-3 text-center text-[11px] text-gray-500 mt-6 shadow-inner no-print">
-        <p>Hệ thống Quản lý Niêm Phong Kẹp Chì Đầu Máy (v16.3) | Bản quyền © 2026 thuộc về <strong class="text-indigo-900">Triệu Việt Phương</strong>. All rights reserved.</p>
+        <p>Hệ thống Quản lý Niêm Phong Kẹp Chì Đầu Máy (v16.4) | Bản quyền © 2026 thuộc về <strong class="text-indigo-900">Triệu Việt Phương</strong>. All rights reserved.</p>
     </footer>
 
     <div id="bienBanConfigModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center p-3 z-[85]">
@@ -538,7 +538,7 @@
         <div class="bg-white rounded-xl max-w-xs w-full p-5 shadow-2xl text-center">
             <h3 class="text-base font-bold mb-1 text-indigo-900">🔐 Xác thực mật khẩu</h3>
             <p id="authModalDesc" class="text-xs text-gray-500 mb-3">Nhập mật khẩu quản trị để thực hiện thao tác:</p>
-            <input type="password" id="authPasswordInput" placeholder="Mặc định: 1279" class="w-full px-3 py-2.5 border-2 border-indigo-500 rounded-lg text-center text-lg font-bold tracking-widest mb-3 focus:outline-none">
+            <input type="password" id="authPasswordInput" onkeydown="if(event.key==='Enter'){event.preventDefault();submitPasswordAuth();}else if(event.key==='Escape'){closeModal('passwordAuthModal');}" placeholder="Mặc định: 1279" class="w-full px-3 py-2.5 border-2 border-indigo-500 rounded-lg text-center text-lg font-bold tracking-widest mb-3 focus:outline-none">
             <p id="authErrorMsg" class="text-red-500 text-[11px] mb-2 hidden">Mật khẩu không chính xác!</p>
             <div class="flex gap-2">
                 <button type="button" onclick="closeModal('passwordAuthModal')" class="w-1/2 py-2 bg-gray-200 rounded-lg text-xs font-semibold">Hủy</button>
@@ -554,8 +554,9 @@
             <form id="addSealForm" onsubmit="saveNewSealNumber(event)">
                 <div class="mb-3">
                     <label class="block text-xs font-semibold text-gray-700 mb-1">🏷️ Nhập số chì (cách nhau bởi dấu phẩy):</label>
-                    <input type="text" id="inputNewSingleSeal" required placeholder="VD: 005170, 005171" class="w-full px-3 py-2 border-2 border-indigo-500 rounded-lg text-sm font-bold text-indigo-700 tracking-wider">
+                    <input type="text" id="inputNewSingleSeal" required oninput="liveSealCheck('inputNewSingleSeal','addSealLiveWarn')" placeholder="VD: 005170, 005171" class="w-full px-3 py-2 border-2 border-indigo-500 rounded-lg text-sm font-bold text-indigo-700 tracking-wider">
                     <p class="text-[10px] text-gray-400 mt-1">Mỗi số chì gồm 6 chữ số.</p>
+                    <p id="addSealLiveWarn" class="text-[11px] font-bold text-red-600 mt-1 hidden"></p>
                 </div>
                 <div class="mb-3">
                     <label class="block text-xs font-semibold text-gray-700 mb-1">📅 Ngày tháng (dd/mm/yy):</label>
@@ -597,8 +598,9 @@
                 </div>
                 <div class="mb-3">
                     <label class="block text-xs font-semibold text-gray-700 mb-1">🏷️ Số chì mới thay thế:</label>
-                    <input type="text" id="inputNewSeal" required placeholder="VD: 005171, 005172" class="w-full px-3 py-2 border-2 border-indigo-500 rounded-lg text-sm font-bold text-indigo-700 tracking-wider">
+                    <input type="text" id="inputNewSeal" required oninput="liveSealCheck('inputNewSeal','updateSealLiveWarn')" placeholder="VD: 005171, 005172" class="w-full px-3 py-2 border-2 border-indigo-500 rounded-lg text-sm font-bold text-indigo-700 tracking-wider">
                     <p class="text-[10px] text-gray-400 mt-1">Mỗi số chì gồm 6 chữ số.</p>
+                    <p id="updateSealLiveWarn" class="text-[11px] font-bold text-red-600 mt-1 hidden"></p>
                 </div>
                 <div class="mb-3">
                     <label class="block text-xs font-semibold text-gray-700 mb-1">📝 Lý do thay thế:</label>
@@ -1438,6 +1440,7 @@
         while (backupKeys.includes(key)) key = `${base}_${n++}`;
         return key;
     }
+    let lastSafetyPayload = null;
     // Chụp ảnh dữ liệu NGAY (đồng bộ) rồi ghi nền; trả về key. Không bao giờ đụng tới cache chính.
     function createSafetyBackup(reason) {
         const build = strip => JSON.stringify(
@@ -1450,6 +1453,7 @@
             warnStorage('⚠️ Không sao lưu được trước thao tác này.');
             return null;
         }
+        lastSafetyPayload = payload;   // giữ trong bộ nhớ để Hoàn tác không phụ thuộc việc ghi nền xong chưa
         const key = uniqueBackupKey();
         backupKeys.push(key); backupKeys.sort();
         KV.set(key, payload).then(() => pruneBackups()).catch(() => {
@@ -1461,6 +1465,52 @@
             });
         });
         return key;
+    }
+
+
+    // ---------- HOÀN TÁC XÓA (dùng ảnh chụp dữ liệu vừa tạo ngay trước khi xóa) ----------
+    let undoTimer = null;
+    function dismissUndoToast() {
+        if (undoTimer) { clearTimeout(undoTimer); undoTimer = null; }
+        const old = document.getElementById('undoToast');
+        if (old) old.remove();
+    }
+    // scope: { loco: 'SỐ HIỆU' } hoặc { station: id }; refresh: hàm vẽ lại giao diện sau khi hoàn tác
+    function offerUndo(message, scope, refresh) {
+        const payload = lastSafetyPayload;
+        dismissUndoToast();
+        if (!payload) return;
+        const container = document.getElementById('toastContainer');
+        if (!container) return;
+        const item = document.createElement('div');
+        item.id = 'undoToast';
+        item.className = 'toast-item toast-info';
+        item.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:10px;';
+        const label = document.createElement('span');
+        label.textContent = message;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = '↩ Hoàn tác';
+        btn.style.cssText = 'background:#fff;color:#312e81;font-weight:800;font-size:12px;padding:4px 10px;border-radius:8px;white-space:nowrap;';
+        btn.onclick = () => { dismissUndoToast(); performUndo(payload, scope, refresh); };
+        item.appendChild(label); item.appendChild(btn);
+        container.appendChild(item);
+        undoTimer = setTimeout(dismissUndoToast, 10000);
+    }
+    function performUndo(payload, scope, refresh) {
+        let snap = null;
+        try { snap = JSON.parse(payload); } catch (e) {}
+        if (!snap || !Array.isArray(snap.data)) { showToast('❌ Không hoàn tác được (dữ liệu sao lưu hỏng).', 'error'); return; }
+        let n = 0;
+        if (scope.loco !== undefined) n = upsertItems('loco', snap.data.filter(l => l && l.number === scope.loco), !!snap.imagesStripped);
+        else if (scope.station !== undefined) {
+            n = upsertItems('station', (snap.stations || []).filter(i => i && String(i.id) === String(scope.station)), false);
+            stationIssues.sort((a, b) => b.id - a.id);
+        }
+        if (!n) { showToast('❌ Không tìm thấy dữ liệu để hoàn tác.', 'error'); return; }
+        logAudit('HOÀN_TÁC_XÓA', { scope });
+        showToast('↩ Đã hoàn tác', 'success');
+        try { refresh && refresh(); } catch (e) { console.warn(e); }
     }
 
     // ---------- 7. AUDIT LOG (chỉ ghi thêm) ----------
@@ -1933,6 +1983,31 @@
 
     function isValidSixDigitSeal(code) { return CONFIG.SEAL_REGEX.test(code.trim()); }
 
+    // Báo trùng ngay khi đang gõ (không đợi bấm lưu). Dùng đúng luật như lúc lưu.
+    function liveSealCheck(inputId, warnId) {
+        const input = document.getElementById(inputId), warn = document.getElementById(warnId);
+        if (!input || !warn) return;
+        const msgs = [];
+        const codes = input.value.split(/[,;\s]+/).map(c => c.trim()).filter(c => c.length > 0);
+        const loc = locomotives[activeLocoIndex];
+        const seal = loc ? getSealArray(loc)[activeSealIndex] : null;
+        const samePos = seal ? extractActiveSealsFromPosition(seal) : [];
+        const seen = new Set();
+        codes.forEach(c => {
+            if (c.length < CONFIG.SEAL_CODE_LENGTH && /^\d+$/.test(c)) return;   // đang gõ dở
+            if (!isValidSixDigitSeal(c)) { msgs.push(`"${c}" không hợp lệ (cần đủ 6 chữ số)`); return; }
+            if (seen.has(c)) { msgs.push(`"${c}" bị lặp trong danh sách nhập`); return; }
+            seen.add(c);
+            const g = checkSealExistsGlobally(c, activeLocoIndex, activeSealIndex);
+            if (g.exists) msgs.push(`🚨 "${c}" đang ở ${g.locoNumber} / ${g.positionName}`);
+            else if (inputId === 'inputNewSingleSeal' && samePos.includes(c)) msgs.push(`"${c}" đã có tại vị trí này`);
+        });
+        warn.textContent = msgs.join(' • ');
+        warn.classList.toggle('hidden', msgs.length === 0);
+        input.classList.toggle('border-red-500', msgs.length > 0);
+        input.classList.toggle('border-indigo-500', msgs.length === 0);
+    }
+
     function checkSealExistsGlobally(sealCode, excludeLocoIdx = -1, excludeSealIdx = -1) {
         let cleanCode = sealCode.trim();
         if (!cleanCode) return { exists: false };
@@ -2120,13 +2195,14 @@
         const sealList = getSealArray(loc);
         let totalHistory = 0;
         sealList.forEach(s => { totalHistory += getHistoryArray(s).length; });
-        const warn = `Xóa vĩnh viễn đầu máy ${locNumber}?\n\n⚠️ Sẽ mất:\n- ${sealList.length} vị trí kẹp chì\n- ${totalHistory} bản ghi lịch sử\n\nThao tác KHÔNG thể hoàn tác!`;
+        const warn = `Xóa vĩnh viễn đầu máy ${locNumber}?\n\n⚠️ Sẽ mất:\n- ${sealList.length} vị trí kẹp chì\n- ${totalHistory} bản ghi lịch sử\n\nCó thể bấm “Hoàn tác” trong 10 giây sau khi xóa.`;
         requestPasswordAuth(warn, () => {
             createSafetyBackup('delete_loco');
             logAudit('XÓA_ĐẦU_MÁY', { locoNumber: locNumber, positions: sealList.length, history: totalHistory });
             locomotives = locomotives.filter(l => l.number !== locNumber);
-            removeItem('loco', nodeKey(locNumber), '🗑️ Đã xóa đầu máy thành công!');
+            removeItem('loco', nodeKey(locNumber), null);
             filterLocomotives();
+            offerUndo(`🗑️ Đã xóa đầu máy ${locNumber}`, { loco: locNumber }, () => filterLocomotives());
         });
     }
 
@@ -2604,8 +2680,13 @@
             const removedPos = sealList.splice(sealIdx, 1)[0] || {};
             loc.seals = sealList;
             logAudit('XÓA_VỊ_TRÍ', { locoNumber: loc.number, sealName: removedPos.name, activeSeals: removedPos.activeSeals || [], history: getHistoryArray(removedPos).length });
-            saveItem('loco', loc, '🗑️ Đã xóa vị trí!', { sensitive: true });
+            saveItem('loco', loc, null, { sensitive: true });
             renderDetailView(loc);
+            const locNo = loc.number;
+            offerUndo('🗑️ Đã xóa vị trí kẹp chì', { loco: locNo }, () => {
+                const i = locomotives.findIndex(l => l.number === locNo);
+                if (i !== -1) { activeLocoIndex = i; renderDetailView(locomotives[i]); }
+            });
         });
     }
 
@@ -2629,6 +2710,7 @@
         document.getElementById('addSealForm').reset();
         document.getElementById('addSealDate').value = getTodayDDMMYY();
         document.getElementById('addSealImgName').textContent = 'Chưa chọn ảnh.';
+        liveSealCheck('inputNewSingleSeal', 'addSealLiveWarn');
         document.getElementById('addSealModal').classList.remove('hidden');
     }
 
@@ -2717,6 +2799,7 @@
         } else {
             container.innerHTML = `<span class="text-gray-400 italic">Vị trí chưa có số chì nào.</span>`;
         }
+        liveSealCheck('inputNewSeal', 'updateSealLiveWarn');
         document.getElementById('updateSealModal').classList.remove('hidden');
     }
 
@@ -2984,9 +3067,17 @@
             const removedH = histArr.splice(histIdx, 1)[0] || {};
             seal.history = histArr;
             logAudit('XÓA_LỊCH_SỬ', { locoNumber: locomotives[activeLocoIndex].number, sealName: seal.name, date: removedH.date, newSeal: removedH.newSeal, oldSeal: removedH.oldSeal, reason: removedH.reason, images: getImagesArray(removedH).length });
-            saveItem('loco', locomotives[activeLocoIndex], '🗑️ Đã xóa bản ghi lịch sử!', { sensitive: true }).then(() => {
+            const locNo = locomotives[activeLocoIndex].number;
+            saveItem('loco', locomotives[activeLocoIndex], null, { sensitive: true }).then(() => {
                 openHistoryModal(sealIdx);
                 renderDetailView(locomotives[activeLocoIndex]);
+                offerUndo('🗑️ Đã xóa bản ghi lịch sử', { loco: locNo }, () => {
+                    const i = locomotives.findIndex(l => l.number === locNo);
+                    if (i === -1) return;
+                    activeLocoIndex = i;
+                    renderDetailView(locomotives[i]);
+                    if (!document.getElementById('historyModal').classList.contains('hidden')) openHistoryModal(sealIdx);
+                });
             });
         });
     }
@@ -3597,8 +3688,9 @@
             const removedIssue = stationIssues.find(i => i.id === issueId) || {};
             logAudit('XÓA_PHIẾU_XUẤT', { id: issueId, receiverUnit: removedIssue.receiverUnit, soHieu: removedIssue.soHieu, ngay: removedIssue.ngay, seals: removedIssue.seals });
             stationIssues = stationIssues.filter(i => i.id !== issueId);
-            removeItem('station', String(issueId), '🗑️ Đã xóa phiếu xuất!');
+            removeItem('station', String(issueId), null);
             renderStationIssuesList(stationIssues);
+            offerUndo('🗑️ Đã xóa phiếu xuất', { station: issueId }, () => renderStationIssuesList(stationIssues));
         });
     }
 
