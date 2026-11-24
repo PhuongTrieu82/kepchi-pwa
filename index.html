@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Quản Lý Kẹp Chì Đầu Máy v16.4</title>
+    <title>Quản Lý Kẹp Chì Đầu Máy v16.5</title>
     <meta name="author" content="Triệu Việt Phương">
     <meta name="copyright" content="© 2026 Triệu Việt Phương. All rights reserved.">
     <meta name="theme-color" content="#312e81">
@@ -14,7 +14,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Kẹp Chì">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="application-version" content="16.4">
+    <meta name="application-version" content="16.5">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -242,7 +242,7 @@
                 <span class="text-xl">🛡️</span>
                 <div>
                     <h1 class="text-sm md:text-lg font-bold leading-tight">QUẢN LÝ KẸP CHÌ ĐẦU MÁY</h1>
-                    <p class="text-[10px] text-indigo-200">v16.4 - Lưu ổ cứng & Đám mây</p>
+                    <p class="text-[10px] text-indigo-200">v16.5 - Lưu ổ cứng & Đám mây</p>
                 </div>
             </div>
             <div class="flex items-center gap-1.5">
@@ -470,7 +470,7 @@
     </main>
 
     <footer class="bg-white border-t py-3 text-center text-[11px] text-gray-500 mt-6 shadow-inner no-print">
-        <p>Hệ thống Quản lý Niêm Phong Kẹp Chì Đầu Máy (v16.4) | Bản quyền © 2026 thuộc về <strong class="text-indigo-900">Triệu Việt Phương</strong>. All rights reserved.</p>
+        <p>Hệ thống Quản lý Niêm Phong Kẹp Chì Đầu Máy (v16.5) | Bản quyền © 2026 thuộc về <strong class="text-indigo-900">Triệu Việt Phương</strong>. All rights reserved.</p>
     </footer>
 
     <div id="bienBanConfigModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center p-3 z-[85]">
@@ -554,8 +554,8 @@
             <form id="addSealForm" onsubmit="saveNewSealNumber(event)">
                 <div class="mb-3">
                     <label class="block text-xs font-semibold text-gray-700 mb-1">🏷️ Nhập số chì (cách nhau bởi dấu phẩy):</label>
-                    <input type="text" id="inputNewSingleSeal" required oninput="liveSealCheck('inputNewSingleSeal','addSealLiveWarn')" placeholder="VD: 005170, 005171" class="w-full px-3 py-2 border-2 border-indigo-500 rounded-lg text-sm font-bold text-indigo-700 tracking-wider">
-                    <p class="text-[10px] text-gray-400 mt-1">Mỗi số chì gồm 6 chữ số.</p>
+                    <input type="text" id="inputNewSingleSeal" required inputmode="numeric" autocomplete="off" oninput="liveSealCheck('inputNewSingleSeal','addSealLiveWarn')" placeholder="VD: 005170, 005171" class="w-full px-3 py-2 border-2 border-indigo-500 rounded-lg text-sm font-bold text-indigo-700 tracking-wider">
+                    <p class="text-[10px] text-gray-400 mt-1">Mỗi số chì gồm 6 chữ số. Có thể nhập dải: <b>005170-005175</b>.</p>
                     <p id="addSealLiveWarn" class="text-[11px] font-bold text-red-600 mt-1 hidden"></p>
                 </div>
                 <div class="mb-3">
@@ -598,8 +598,8 @@
                 </div>
                 <div class="mb-3">
                     <label class="block text-xs font-semibold text-gray-700 mb-1">🏷️ Số chì mới thay thế:</label>
-                    <input type="text" id="inputNewSeal" required oninput="liveSealCheck('inputNewSeal','updateSealLiveWarn')" placeholder="VD: 005171, 005172" class="w-full px-3 py-2 border-2 border-indigo-500 rounded-lg text-sm font-bold text-indigo-700 tracking-wider">
-                    <p class="text-[10px] text-gray-400 mt-1">Mỗi số chì gồm 6 chữ số.</p>
+                    <input type="text" id="inputNewSeal" required inputmode="numeric" autocomplete="off" oninput="liveSealCheck('inputNewSeal','updateSealLiveWarn')" placeholder="VD: 005171, 005172" class="w-full px-3 py-2 border-2 border-indigo-500 rounded-lg text-sm font-bold text-indigo-700 tracking-wider">
+                    <p class="text-[10px] text-gray-400 mt-1">Mỗi số chì gồm 6 chữ số. Có thể nhập dải: <b>005170-005175</b>.</p>
                     <p id="updateSealLiveWarn" class="text-[11px] font-bold text-red-600 mt-1 hidden"></p>
                 </div>
                 <div class="mb-3">
@@ -855,7 +855,7 @@
 
                     <div class="border-t pt-2">
                         <label class="block text-[11px] font-semibold text-gray-700 mb-1">Cách 2: Nhập hoặc dán danh sách (cách nhau bởi dấu phẩy, khoảng trắng):</label>
-                        <textarea id="siSealsListInput" rows="3" placeholder="VD: 005401, 005402, 005403..." class="w-full px-2.5 py-1.5 border rounded text-xs font-bold text-violet-800"></textarea>
+                        <textarea id="siSealsListInput" rows="3" inputmode="numeric" placeholder="VD: 005401, 005402, 005403..." class="w-full px-2.5 py-1.5 border rounded text-xs font-bold text-violet-800"></textarea>
                     </div>
                 </div>
                 <div class="mb-4">
@@ -1983,12 +1983,33 @@
 
     function isValidSixDigitSeal(code) { return CONFIG.SEAL_REGEX.test(code.trim()); }
 
+    // Tách danh sách số chì; hỗ trợ dải "005170-005175" (bung thành các số liên tiếp, tối đa 200 số/dải).
+    // Dải sai (ngược, quá lớn) được giữ nguyên để bước kiểm tra báo "không hợp lệ".
+    const MAX_RANGE_SEALS = 200;
+    function parseSealInput(str) {
+        const norm = String(str || '').replace(/\s*[-–—~]\s*/g, '-');
+        const out = [];
+        norm.split(/[,;\s]+/).map(t => t.trim()).filter(t => t.length > 0).forEach(tok => {
+            const m = /^(\d{6})-(\d{6})$/.exec(tok);
+            if (m) {
+                const a = parseInt(m[1], 10), b = parseInt(m[2], 10);
+                if (b >= a && b - a < MAX_RANGE_SEALS) {
+                    for (let i = a; i <= b; i++) out.push(String(i).padStart(6, '0'));
+                    return;
+                }
+            }
+            out.push(tok);
+        });
+        return out;
+    }
+
     // Báo trùng ngay khi đang gõ (không đợi bấm lưu). Dùng đúng luật như lúc lưu.
     function liveSealCheck(inputId, warnId) {
         const input = document.getElementById(inputId), warn = document.getElementById(warnId);
         if (!input || !warn) return;
         const msgs = [];
-        const codes = input.value.split(/[,;\s]+/).map(c => c.trim()).filter(c => c.length > 0);
+        const codes = parseSealInput(input.value);
+        const rawCount = input.value.trim() ? input.value.replace(/\s*[-–—~]\s*/g, '-').split(/[,;\s]+/).filter(Boolean).length : 0;
         const loc = locomotives[activeLocoIndex];
         const seal = loc ? getSealArray(loc)[activeSealIndex] : null;
         const samePos = seal ? extractActiveSealsFromPosition(seal) : [];
@@ -2002,8 +2023,12 @@
             if (g.exists) msgs.push(`🚨 "${c}" đang ở ${g.locoNumber} / ${g.positionName}`);
             else if (inputId === 'inputNewSingleSeal' && samePos.includes(c)) msgs.push(`"${c}" đã có tại vị trí này`);
         });
-        warn.textContent = msgs.join(' • ');
-        warn.classList.toggle('hidden', msgs.length === 0);
+        const info = (msgs.length === 0 && codes.length > rawCount)
+            ? `✔ Dải được bung thành ${codes.length} số: ${codes[0]} → ${codes[codes.length - 1]}` : '';
+        warn.textContent = msgs.length ? msgs.join(' • ') : info;
+        warn.classList.toggle('hidden', msgs.length === 0 && !info);
+        warn.classList.toggle('text-red-600', msgs.length > 0);
+        warn.classList.toggle('text-green-700', msgs.length === 0);
         input.classList.toggle('border-red-500', msgs.length > 0);
         input.classList.toggle('border-indigo-500', msgs.length === 0);
     }
@@ -2720,7 +2745,7 @@
         const date = document.getElementById('addSealDate').value.trim();
         const fileInput = document.getElementById('addSealImageFile');
 
-        let newCodesArr = newSealStr.split(/[,;\s]+/).map(c => c.trim()).filter(c => c.length > 0);
+        let newCodesArr = parseSealInput(newSealStr);
         if (newCodesArr.length === 0) { showToast('⚠️ Vui lòng nhập ít nhất một số chì!', 'warn'); return; }
         const dupInInput = newCodesArr.filter((c, i) => newCodesArr.indexOf(c) !== i);
         if (dupInInput.length > 0) {
@@ -2813,7 +2838,7 @@
         let selectedOld = [];
         document.querySelectorAll('input[name="oldSealCheckbox"]:checked').forEach(cb => selectedOld.push(cb.value));
 
-        let newCodesArr = newSealStr.split(/[,;\s]+/).map(c => c.trim()).filter(c => c.length > 0);
+        let newCodesArr = parseSealInput(newSealStr);
         if (newCodesArr.length === 0) { showToast('⚠️ Nhập ít nhất 1 số chì mới!', 'warn'); return; }
         const dupInInput = newCodesArr.filter((c, i) => newCodesArr.indexOf(c) !== i);
         if (dupInInput.length > 0) {
@@ -3603,7 +3628,7 @@
         const reason = document.getElementById('siReason').value.trim();
         const rawSeals = document.getElementById('siSealsListInput').value.trim();
 
-        let sealsArr = rawSeals.split(/[,;\s]+/).map(s => s.trim()).filter(s => s.length > 0);
+        let sealsArr = parseSealInput(rawSeals);
         if (sealsArr.length === 0) {
             showToast('⚠️ Vui lòng nhập danh sách số chì cấp phát!', 'warn');
             return;
