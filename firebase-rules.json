@@ -1,0 +1,30 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "locomotives_v2": {
+      ".read": "auth != null",
+      "$id": {
+        ".write": "auth != null && (newData.exists() || auth.token.email.toLowerCase() == 'dán-email-admin@gmail.com')"
+      }
+    },
+
+    "station_issues_v2": {
+      ".read": "auth != null",
+      "$id": { ".write": "auth != null" }
+    },
+
+    "images_v3":   { ".read": "auth != null", "$id": { ".write": "auth != null" } },
+    "image_index": { ".read": "auth != null", "$id": { ".write": "auth != null" } },
+    "meta":        { ".read": "auth != null", ".write": "auth != null" },
+
+    "locomotives":    { ".read": "auth != null", ".write": false },
+    "station_issues": { ".read": "auth != null", ".write": false },
+
+    "audit_log": {
+      ".read": "auth != null && auth.token.email.toLowerCase() == 'dán-email-admin@gmail.com'",
+      "$id": { ".write": "auth != null && !data.exists()" }
+    }
+  }
+}

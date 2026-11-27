@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Quản Lý Kẹp Chì Đầu Máy v16.6</title>
+    <title>Quản Lý Kẹp Chì Đầu Máy v16.8</title>
     <meta name="author" content="Triệu Việt Phương">
     <meta name="copyright" content="© 2026 Triệu Việt Phương. All rights reserved.">
     <meta name="theme-color" content="#312e81">
@@ -14,10 +14,11 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Kẹp Chì">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="application-version" content="16.6">
+    <meta name="application-version" content="16.8">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <style>
         .bien-ban-font { font-family: var(--bb-font-family, "Times New Roman", Times, serif) !important; color: #000000 !important; }
         #zoomContainer { overflow: hidden; touch-action: none; display: flex; align-items: center; justify-content: center; width: 100%; height: 75vh; position: relative; }
@@ -120,6 +121,7 @@
         .bb-text-body strong {
             font-size: inherit !important;
         }
+        body.not-admin .admin-only { display: none !important; }
         /* Tiêu ngữ: phải có độ ưu tiên cao hơn ".bb-text-body p" (font-size: inherit) thì mới nhỏ hơn thân bài */
         .bb-text-body .bb-header-small {
             font-size: min(calc(var(--bb-font-size, 14pt) * 0.79), 11pt) !important;
@@ -263,13 +265,13 @@
                 <span class="text-xl">🛡️</span>
                 <div>
                     <h1 class="text-sm md:text-lg font-bold leading-tight">QUẢN LÝ KẸP CHÌ ĐẦU MÁY</h1>
-                    <p class="text-[10px] text-indigo-200">v16.6 - Lưu ổ cứng & Đám mây</p>
+                    <p class="text-[10px] text-indigo-200">v16.8 - Lưu ổ cứng & Đám mây</p>
                 </div>
             </div>
             <div class="flex items-center gap-1.5">
                 <button id="btnInstallPwa" onclick="installPwa()" class="hidden bg-white text-indigo-900 hover:bg-indigo-50 px-2.5 py-1.5 rounded-lg text-xs font-bold shadow">📲 Cài app</button>
                 <button onclick="syncFromServer()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold shadow flex items-center gap-1">🔄 Đồng bộ</button>
-                <button onclick="openSettingsModal()" class="bg-indigo-800 hover:bg-indigo-700 text-white px-2 py-1.5 rounded-lg text-xs shadow">⚙️ Đổi MK</button>
+                <button id="btnAccount" onclick="openSettingsModal()" class="bg-indigo-800 hover:bg-indigo-700 text-white px-2 py-1.5 rounded-lg text-xs shadow">👤 Tài khoản</button>
                 <button onclick="openStatsModal()" class="bg-amber-500 hover:bg-amber-400 text-indigo-950 px-2.5 py-1.5 rounded-lg text-xs font-bold shadow">📈 Thống kê</button>
             </div>
         </div>
@@ -323,7 +325,7 @@
                     <p id="detailLocoSubInfo" class="text-xs text-gray-500">D18E · 9 vị trí</p>
                 </div>
                 <div class="flex flex-wrap gap-2">
-                    <button onclick="openAddPositionModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-lg text-xs font-bold shadow">+ Thêm vị trí</button>
+                    <button onclick="openAddPositionModal()" class="admin-only bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-lg text-xs font-bold shadow">+ Thêm vị trí</button>
                     <button onclick="openBienBanConfigModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg text-xs font-bold shadow">📄 Xuất Biên Bản</button>
                     <button onclick="openGlobalHistoryModal()" class="bg-amber-500 hover:bg-amber-600 text-indigo-950 px-3 py-2 rounded-lg text-xs font-bold shadow">📜 Toàn bộ lịch sử</button>
                 </div>
@@ -491,7 +493,7 @@
     </main>
 
     <footer class="bg-white border-t py-3 text-center text-[11px] text-gray-500 mt-6 shadow-inner no-print">
-        <p>Hệ thống Quản lý Niêm Phong Kẹp Chì Đầu Máy (v16.6) | Bản quyền © 2026 thuộc về <strong class="text-indigo-900">Triệu Việt Phương</strong>. All rights reserved.</p>
+        <p>Hệ thống Quản lý Niêm Phong Kẹp Chì Đầu Máy (v16.8) | Bản quyền © 2026 thuộc về <strong class="text-indigo-900">Triệu Việt Phương</strong>. All rights reserved.</p>
     </footer>
 
     <div id="bienBanConfigModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center p-3 z-[85]">
@@ -551,15 +553,30 @@
             </form>
         </div>
     </div>
+    <div id="loginOverlay" class="fixed inset-0 bg-indigo-950 hidden flex items-center justify-center p-4 z-[300]">
+        <form onsubmit="doLogin(event)" class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl">
+            <div class="text-center mb-4">
+                <div class="text-4xl">🛡️</div>
+                <h2 class="text-base font-bold text-indigo-900 mt-1">QUẢN LÝ KẸP CHÌ ĐẦU MÁY</h2>
+                <p class="text-xs text-gray-500">Đăng nhập để tiếp tục</p>
+            </div>
+            <label class="block text-xs font-semibold text-gray-700 mb-1">Email</label>
+            <input id="loginEmail" type="email" autocomplete="username" required class="w-full px-3 py-2.5 border rounded-lg text-sm mb-3 focus:outline-none focus:border-indigo-500">
+            <label class="block text-xs font-semibold text-gray-700 mb-1">Mật khẩu</label>
+            <input id="loginPassword" type="password" autocomplete="current-password" required class="w-full px-3 py-2.5 border rounded-lg text-sm mb-3 focus:outline-none focus:border-indigo-500">
+            <p id="loginError" class="hidden text-red-600 text-xs mb-3 text-center"></p>
+            <button id="loginBtn" type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-bold shadow">Đăng nhập</button>
+            <p id="loginHint" class="text-[10px] text-gray-400 text-center mt-3">Lần đăng nhập đầu tiên cần có mạng. Sau đó app tự nhớ tài khoản.</p>
+        </form>
+    </div>
+
     <div id="passwordAuthModal" class="fixed inset-0 bg-black bg-opacity-75 hidden flex items-center justify-center p-3 z-[100]">
         <div class="bg-white rounded-xl max-w-xs w-full p-5 shadow-2xl text-center">
-            <h3 class="text-base font-bold mb-1 text-indigo-900">🔐 Xác thực mật khẩu</h3>
-            <p id="authModalDesc" class="text-xs text-gray-500 mb-3">Nhập mật khẩu quản trị để thực hiện thao tác:</p>
-            <input type="password" id="authPasswordInput" onkeydown="if(event.key==='Enter'){event.preventDefault();submitPasswordAuth();}else if(event.key==='Escape'){closeModal('passwordAuthModal');}" placeholder="Mặc định: 1279" class="w-full px-3 py-2.5 border-2 border-indigo-500 rounded-lg text-center text-lg font-bold tracking-widest mb-3 focus:outline-none">
-            <p id="authErrorMsg" class="text-red-500 text-[11px] mb-2 hidden">Mật khẩu không chính xác!</p>
+            <h3 class="text-base font-bold mb-2 text-red-700">⚠️ Xác nhận</h3>
+            <p id="authModalDesc" class="text-xs text-gray-700 mb-4" style="white-space: pre-line;"></p>
             <div class="flex gap-2">
-                <button type="button" onclick="closeModal('passwordAuthModal')" class="w-1/2 py-2 bg-gray-200 rounded-lg text-xs font-semibold">Hủy</button>
-                <button type="button" onclick="submitPasswordAuth()" class="w-1/2 py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold shadow">Xác nhận</button>
+                <button type="button" onclick="cancelConfirm()" class="w-1/2 py-2 bg-gray-200 rounded-lg text-xs font-semibold">Hủy</button>
+                <button type="button" id="btnConfirmOk" onclick="submitConfirm()" class="w-1/2 py-2 bg-red-600 text-white rounded-lg text-xs font-bold shadow">Đồng ý</button>
             </div>
         </div>
     </div>
@@ -705,7 +722,7 @@
             </div>
             <div id="historyListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1"></div>
             <div class="flex justify-between pt-3 border-t mt-2">
-                <button type="button" onclick="clearOldImagesInPosition()" class="px-3 py-2 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-lg text-xs font-bold" title="Chỉ xóa ảnh, giữ nguyên số chì / ngày / lý do. Giữ ảnh bản ghi mới nhất và ảnh chì đang dùng.">🧹 Dọn ảnh cũ</button>
+                <button type="button" onclick="clearOldImagesInPosition()" class="admin-only px-3 py-2 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-lg text-xs font-bold" title="Chỉ xóa ảnh, giữ nguyên số chì / ngày / lý do. Giữ ảnh bản ghi mới nhất và ảnh chì đang dùng.">🧹 Dọn ảnh cũ</button>
                 <button type="button" onclick="closeModal('historyModal')" class="px-4 py-2 bg-gray-200 rounded-lg text-xs">Đóng</button>
             </div>
         </div>
@@ -739,29 +756,13 @@
 
     <div id="settingsModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center p-3 z-[90]">
         <div class="bg-white rounded-xl max-w-sm w-full p-5 shadow-2xl">
-            <h3 class="text-base font-bold mb-3 text-indigo-900 text-center">⚙️ Đổi Mật Khẩu Quản Trị</h3>
-            <p class="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 p-2 rounded mb-3 text-center">
-                ⚠️ Mật khẩu này chỉ chống thao tác nhầm, <b>không phải bảo mật thật</b>.
-            </p>
-            <form onsubmit="saveNewPassword(event)">
-                <div class="mb-3">
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">Mật khẩu hiện tại (mặc định: 1279):</label>
-                    <input type="password" id="oldPassInput" required class="w-full px-3 py-2 border rounded-lg text-xs">
-                </div>
-                <div class="mb-3">
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">Mật khẩu mới:</label>
-                    <input type="password" id="newPassInput" required class="w-full px-3 py-2 border rounded-lg text-xs">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">Xác nhận mật khẩu mới:</label>
-                    <input type="password" id="confirmPassInput" required class="w-full px-3 py-2 border rounded-lg text-xs">
-                </div>
-                <p id="passErrorMsg" class="text-red-500 text-[10px] mb-2 hidden text-center"></p>
-                <div class="flex justify-end gap-2">
-                    <button type="button" onclick="closeModal('settingsModal')" class="px-3 py-2 bg-gray-200 rounded-lg text-xs">Hủy</button>
-                    <button type="submit" class="px-3.5 py-2 bg-indigo-600 text-white rounded-lg text-xs font-semibold">Lưu thay đổi</button>
-                </div>
-            </form>
+            <h3 class="text-base font-bold mb-3 text-indigo-900 text-center">👤 Tài khoản</h3>
+            <p id="accountInfo" class="text-sm font-bold text-center text-gray-800 mb-2 break-all"></p>
+            <p id="accountRoleNote" class="text-[11px] text-gray-600 bg-gray-50 border p-2 rounded mb-4 text-center"></p>
+            <div class="flex justify-end gap-2">
+                <button type="button" onclick="closeModal('settingsModal')" class="px-3 py-2 bg-gray-200 rounded-lg text-xs">Đóng</button>
+                <button type="button" id="btnLogout" onclick="doLogout()" class="px-3.5 py-2 bg-red-600 text-white rounded-lg text-xs font-semibold">Đăng xuất</button>
+            </div>
         </div>
     </div>
 
@@ -1035,20 +1036,20 @@
             <p class="text-xs text-gray-500 mb-3">Xuất file JSON tải về máy hoặc phục hồi dữ liệu khi cần.</p>
             <div class="flex flex-col gap-2 mb-4">
                 <button onclick="exportDataJSON()" class="bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-lg text-xs font-bold shadow flex items-center justify-center gap-1">📥 Tải file sao lưu (JSON)</button>
-                <label class="bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg text-xs font-bold text-center cursor-pointer shadow block">
+                <label class="admin-only bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg text-xs font-bold text-center cursor-pointer shadow block">
                     📤 Khôi phục từ file JSON
                     <input type="file" accept=".json" onchange="importDataJSON(event)" class="hidden">
                 </label>
-                <button onclick="triggerHistoryAutoRecovery()" class="bg-amber-600 hover:bg-amber-700 text-white py-2.5 rounded-lg text-xs font-bold shadow flex items-center justify-center gap-1">
+                <button onclick="triggerHistoryAutoRecovery()" class="admin-only bg-amber-600 hover:bg-amber-700 text-white py-2.5 rounded-lg text-xs font-bold shadow flex items-center justify-center gap-1">
                     🛠️ Tự động quét & Khôi phục chì từ Lịch sử
                 </button>
                 <div class="border-t pt-2 mt-1">
                     <label class="block text-xs font-bold text-gray-700 mb-1">🕑 Bản sao lưu tự động (chụp trước mỗi thao tác xóa/thay):</label>
                     <div class="flex gap-2">
                         <select id="autoBackupSelect" class="flex-1 px-2 py-2 border rounded-lg text-xs bg-white"></select>
-                        <button type="button" onclick="restoreAutoBackup()" class="bg-rose-600 hover:bg-rose-700 text-white px-3 py-2 rounded-lg text-xs font-bold shadow">↩️ Khôi phục</button>
+                        <button type="button" onclick="restoreAutoBackup()" class="admin-only bg-rose-600 hover:bg-rose-700 text-white px-3 py-2 rounded-lg text-xs font-bold shadow">↩️ Khôi phục</button>
                     </div>
-                    <button type="button" onclick="purgeOrphanImages()" class="mt-2 w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded-lg text-[11px] font-bold border" title="Chỉ xóa ảnh không còn bản ghi hay bản sao lưu nào dùng và cũ hơn 30 ngày">🗑️ Dọn kho ảnh không còn dùng (&gt; 30 ngày)</button>
+                    <button type="button" onclick="purgeOrphanImages()" class="admin-only mt-2 w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded-lg text-[11px] font-bold border" title="Chỉ xóa ảnh không còn bản ghi hay bản sao lưu nào dùng và cũ hơn 30 ngày">🗑️ Dọn kho ảnh không còn dùng (&gt; 30 ngày)</button>
                 </div>
             </div>
             <div class="flex justify-end">
@@ -1123,7 +1124,6 @@
     <script>
     const CONFIG = {
         FIREBASE_URL: "https://qlnpkc-default-rtdb.firebaseio.com",
-        DEFAULT_PASSWORD: "1279",
         SEAL_CODE_LENGTH: 6,
         SEAL_REGEX: /^\d{6}$/,
         SEAL_EXTRACT_REGEX: /\d{6}/g,
@@ -1135,7 +1135,6 @@
         TOAST_DURATION: 3200,
         MAX_SEALS_PER_POSITION: Infinity,
         STORAGE_KEYS: {
-            ADMIN_PASS: 'admin_delete_pass',
             PARTICIPANTS: 'bb_participants_v1544',
             DIA_DANH: 'bb_dia_danh_v1544',
             LOCAL_CACHE: 'loco_seal_app_cache_v159'
@@ -1177,22 +1176,37 @@
         return Array.isArray(h.images) ? h.images : Object.values(h.images);
     }
 
-    firebase.initializeApp({ databaseURL: CONFIG.FIREBASE_URL });
+    // ==========================================================
+    // 🔐 ĐĂNG NHẬP & PHÂN QUYỀN
+    //  - Bật đăng nhập: dán apiKey (Firebase Console > Project settings > Your apps > Web app) vào FIREBASE_CONFIG.
+    //  - Admin: điền email vào ADMIN_EMAILS (viết thường). Admin được sửa/xóa mọi thứ.
+    //  - Người khác: thêm chì; chỉ sửa/xóa số chì do chính mình thêm trong OWN_EDIT_WINDOW_MS (30 phút).
+    //  - Chưa điền apiKey thì app chạy như cũ (một người dùng, đủ quyền) và nhắc ở mục Tài khoản.
+    // ==========================================================
+    const FIREBASE_CONFIG = {
+        apiKey: 'DÁN_API_KEY_VÀO_ĐÂY',
+        authDomain: 'qlnpkc.firebaseapp.com',   // kiểm tra lại đúng với dự án của bạn
+        projectId: 'qlnpkc'                      // kiểm tra lại đúng với dự án của bạn
+    };
+    const ADMIN_EMAILS = ['dán-email-admin@gmail.com'];
+    const OWN_EDIT_WINDOW_MS = 30 * 60 * 1000;
+    const AUTH_ENABLED = !!FIREBASE_CONFIG.apiKey && !/DÁN/.test(FIREBASE_CONFIG.apiKey);
+    firebase.initializeApp(AUTH_ENABLED
+        ? Object.assign({ databaseURL: CONFIG.FIREBASE_URL }, FIREBASE_CONFIG)
+        : { databaseURL: CONFIG.FIREBASE_URL });
     const db = firebase.database();
+    const AUTH = { enabled: AUTH_ENABLED, user: null, isAdmin: !AUTH_ENABLED, ready: !AUTH_ENABLED };
 
     let locomotives = [];
     let activeLocoIndex = -1;
     let activeSealIndex = -1;
     let activeEditHistoryIndex = -1;
-    let pendingPasswordCallback = null;
+    let pendingConfirmCallback = null;
     let bbCurrentFontSize = 14;
     let scale = 1, panX = 0, panY = 0;
     let isDragging = false, startX = 0, startY = 0;
     let initialDistance = null;
 
-    if (!localStorage.getItem(CONFIG.STORAGE_KEYS.ADMIN_PASS)) {
-        localStorage.setItem(CONFIG.STORAGE_KEYS.ADMIN_PASS, CONFIG.DEFAULT_PASSWORD);
-    }
 
     // ==========================================================
     // 🛡️ LỚP AN TOÀN DỮ LIỆU + LƯU TRỮ KÉP (LOCAL TRƯỚC → CLOUD SAU)
@@ -1409,8 +1423,9 @@
 
     // Xóa vĩnh viễn ảnh không còn đầu máy / bản sao lưu nào trỏ tới và đã quá 30 ngày
     function purgeOrphanImages() {
+        if (!requireAdmin()) return;
         if (!isOnline) { showToast('⚠️ Cần có kết nối mạng để dọn kho ảnh.', 'warn'); return; }
-        requestPasswordAuth('Xóa VĨNH VIỄN các ảnh không còn gắn với bản ghi nào (và không nằm trong bản sao lưu), đã cũ hơn 30 ngày?', async () => {
+        requestConfirm('Xóa VĨNH VIỄN các ảnh không còn gắn với bản ghi nào (và không nằm trong bản sao lưu), đã cũ hơn 30 ngày?', async () => {
             showLoading('Đang quét kho ảnh...');
             try {
                 const used = new Set();
@@ -1532,7 +1547,7 @@
 
     // ---------- 7. AUDIT LOG (chỉ ghi thêm) ----------
     function logAudit(action, details = {}) {
-        const entry = { ts: Date.now(), at: new Date().toISOString(), action, details };
+        const entry = { ts: Date.now(), at: new Date().toISOString(), action, details, by: AUTH.user ? AUTH.user.email : null };
         try {
             const log = readJSON(SAFETY_KEYS.AUDIT, []);
             log.push(entry);
@@ -1744,6 +1759,7 @@
     }
 
     function startCloud() {
+        if (!AUTH.ready) return;      // chờ đăng nhập xong mới nghe dữ liệu đám mây
         if (cloudStarted) return;
         cloudStarted = true;
         localReadyPromise.then(() => ensureSchemaV2()).then(() => {
@@ -1780,7 +1796,8 @@
         return cleared;
     }
     function clearOldImagesInPosition() {
-        requestPasswordAuth('Gỡ ảnh cũ khỏi vị trí này?\n(Giữ số chì, ngày, lý do; giữ ảnh của bản ghi mới nhất và ảnh chì đang dùng. Dữ liệu ảnh còn nằm trong kho 30 ngày và khôi phục được từ bản sao lưu.)', () => {
+        if (!requireAdmin()) return;
+        requestConfirm('Gỡ ảnh cũ khỏi vị trí này?\n(Giữ số chì, ngày, lý do; giữ ảnh của bản ghi mới nhất và ảnh chì đang dùng. Dữ liệu ảnh còn nằm trong kho 30 ngày và khôi phục được từ bản sao lưu.)', () => {
             const loc = locomotives[activeLocoIndex];
             const seal = loc && getSealArray(loc)[activeSealIndex];
             if (!seal) return;
@@ -1828,9 +1845,10 @@
         }).join('') : '<option value="">(chưa có bản sao lưu nào)</option>';
     }
     function restoreAutoBackup() {
+        if (!requireAdmin()) return;
         const key = document.getElementById('autoBackupSelect').value;
         if (!key) { showToast('⚠️ Chưa có bản sao lưu nào!', 'warn'); return; }
-        requestPasswordAuth(`Khôi phục dữ liệu từ bản sao lưu ${key}?\nTrạng thái hiện tại sẽ được sao lưu trước. Đầu máy trùng số hiệu sẽ được thay bằng bản trong sao lưu.`, () => {
+        requestConfirm(`Khôi phục dữ liệu từ bản sao lưu ${key}?\nTrạng thái hiện tại sẽ được sao lưu trước. Đầu máy trùng số hiệu sẽ được thay bằng bản trong sao lưu.`, () => {
             KV.get(key).then(str => {
                 let snap = null;
                 try { snap = JSON.parse(str); } catch (e) {}
@@ -1891,7 +1909,7 @@
         document.body.classList.toggle('is-offline', !online);
         isOnline = online;
         if (!online) showToast('🔴 Mất kết nối đám mây — Đang dùng dữ liệu trên ổ cứng!', 'warn');
-        if (online) { warnedSyncFail = false; startCloud(); flushPending(); flushPendingImages(); scheduleImageMigration(); }
+        if (online && AUTH.ready) { warnedSyncFail = false; startCloud(); flushPending(); flushPendingImages(); scheduleImageMigration(); }
     });
 
     function applyBienBanStyle() {
@@ -2067,24 +2085,129 @@
         return { exists: false };
     }
 
-    function requestPasswordAuth(actionDescription, callback) {
+    // ---------- Hỏi xác nhận (thay cho mật khẩu cũ) ----------
+    function requestConfirm(actionDescription, callback) {
         document.getElementById('authModalDesc').innerText = actionDescription;
-        document.getElementById('authPasswordInput').value = '';
-        document.getElementById('authErrorMsg').classList.add('hidden');
-        pendingPasswordCallback = callback;
+        pendingConfirmCallback = callback;
         document.getElementById('passwordAuthModal').classList.remove('hidden');
-        setTimeout(() => document.getElementById('authPasswordInput').focus(), 100);
+        setTimeout(() => { const b = document.getElementById('btnConfirmOk'); if (b) b.focus(); }, 50);
+    }
+    function submitConfirm() {
+        const cb = pendingConfirmCallback;
+        pendingConfirmCallback = null;
+        closeModal('passwordAuthModal');
+        if (cb) cb();
+    }
+    function cancelConfirm() { pendingConfirmCallback = null; closeModal('passwordAuthModal'); }
+    document.addEventListener('keydown', (e) => {
+        const modal = document.getElementById('passwordAuthModal');
+        if (!modal || modal.classList.contains('hidden')) return;
+        if (e.key === 'Enter') { e.preventDefault(); submitConfirm(); }
+        else if (e.key === 'Escape') { e.preventDefault(); cancelConfirm(); }
+    });
+
+    // ---------- Phân quyền ----------
+    function isAdmin() { return !AUTH.enabled || AUTH.isAdmin; }
+    function ownerStamp() {
+        return AUTH.user ? { by: AUTH.user.email, byUid: AUTH.user.uid, at: Date.now() } : { at: Date.now() };
+    }
+    // bản ghi do chính mình tạo và còn trong 30 phút
+    function isMine(item) {
+        return !!(AUTH.user && item && item.byUid === AUTH.user.uid && item.at && (Date.now() - item.at) <= OWN_EDIT_WINDOW_MS);
+    }
+    function canModifyEntry(item) { return isAdmin() || isMine(item); }
+    function denyToast(msg) { showToast('🔒 ' + (msg || 'Bạn không có quyền thực hiện thao tác này.'), 'error'); }
+    function denyEntry() { denyToast('Chỉ admin, hoặc chính người đã thêm trong vòng 30 phút, mới được sửa/xóa mục này.'); }
+    function requireAdmin(msg) {
+        if (isAdmin()) return true;
+        denyToast(msg || 'Chỉ admin mới được thực hiện thao tác này.');
+        return false;
+    }
+    // các số chì đang có tại vị trí mà người dùng hiện tại được phép sửa/tháo
+    function ownedSealCodes(seal) {
+        const active = extractActiveSealsFromPosition(seal);
+        if (isAdmin()) return new Set(active);
+        const mine = new Set();
+        getHistoryArray(seal).forEach(h => {
+            if (!isMine(h) || !h.newSeal || h.newSeal === 'Đã tháo trống' || h.newSeal === 'Tháo dỡ') return;
+            (String(h.newSeal).match(CONFIG.SEAL_EXTRACT_REGEX) || []).forEach(c => mine.add(c));
+        });
+        return new Set(active.filter(c => mine.has(c)));
     }
 
-    function submitPasswordAuth() {
-        const entered = document.getElementById('authPasswordInput').value;
-        const currentPass = localStorage.getItem(CONFIG.STORAGE_KEYS.ADMIN_PASS) || CONFIG.DEFAULT_PASSWORD;
-        if (entered === currentPass) {
-            closeModal('passwordAuthModal');
-            if (pendingPasswordCallback) { pendingPasswordCallback(); pendingPasswordCallback = null; }
-        } else {
-            document.getElementById('authErrorMsg').classList.remove('hidden');
+    // ---------- Đăng nhập ----------
+    function showLogin(show) {
+        const el = document.getElementById('loginOverlay');
+        if (el) el.classList.toggle('hidden', !show);
+    }
+    function updateAuthUI() {
+        document.body.classList.toggle('not-admin', !isAdmin());
+        const btn = document.getElementById('btnAccount');
+        const info = document.getElementById('accountInfo');
+        const note = document.getElementById('accountRoleNote');
+        const logout = document.getElementById('btnLogout');
+        if (!AUTH.enabled) {
+            if (btn) btn.textContent = '👤 Tài khoản';
+            if (info) info.textContent = 'Chưa bật đăng nhập';
+            if (note) note.textContent = 'Chưa điền apiKey Firebase trong FIREBASE_CONFIG nên app đang chạy chế độ một người dùng, đủ quyền. Xem HUONG-DAN.txt để bật đăng nhập.';
+            if (logout) logout.classList.add('hidden');
+            return;
         }
+        const email = AUTH.user ? AUTH.user.email : '';
+        const short = email.split('@')[0].slice(0, 12);
+        if (btn) btn.textContent = `👤 ${short}${isAdmin() ? ' (Admin)' : ''}`;
+        if (info) info.textContent = email;
+        if (note) note.textContent = isAdmin()
+            ? 'Quyền: Admin — sửa/xóa được mọi dữ liệu.'
+            : 'Quyền: Người nhập liệu — được thêm chì; chỉ sửa/xóa số chì do chính bạn thêm trong vòng 30 phút. Việc khác cần admin.';
+        if (logout) logout.classList.remove('hidden');
+    }
+    function authErrorText(err) {
+        const c = err && err.code || '';
+        if (c === 'auth/network-request-failed') return 'Không có kết nối mạng. Lần đăng nhập đầu tiên cần có mạng.';
+        if (c === 'auth/too-many-requests') return 'Thử sai quá nhiều lần. Hãy đợi vài phút rồi thử lại.';
+        if (c === 'auth/user-disabled') return 'Tài khoản này đã bị khóa.';
+        return 'Sai email hoặc mật khẩu.';
+    }
+    function doLogin(event) {
+        event.preventDefault();
+        const email = document.getElementById('loginEmail').value.trim();
+        const pass = document.getElementById('loginPassword').value;
+        const err = document.getElementById('loginError');
+        const btn = document.getElementById('loginBtn');
+        err.classList.add('hidden');
+        btn.disabled = true; btn.textContent = 'Đang đăng nhập...';
+        firebase.auth().signInWithEmailAndPassword(email, pass)
+            .then(() => { document.getElementById('loginPassword').value = ''; })
+            .catch(e => { err.textContent = authErrorText(e); err.classList.remove('hidden'); })
+            .finally(() => { btn.disabled = false; btn.textContent = 'Đăng nhập'; });
+    }
+    function doLogout() {
+        if (!AUTH.enabled) return;
+        firebase.auth().signOut().finally(() => location.reload());
+    }
+    function initAuth() {
+        updateAuthUI();
+        if (!AUTH.enabled) {
+            setTimeout(() => showToast('⚠️ Chưa bật đăng nhập (chưa điền apiKey). App đang chạy chế độ một người dùng.', 'warn'), 1500);
+            return;
+        }
+        showLogin(true);
+        firebase.auth().onAuthStateChanged(user => {
+            if (user) {
+                AUTH.user = { uid: user.uid, email: user.email || '' };
+                AUTH.isAdmin = ADMIN_EMAILS.map(x => String(x).toLowerCase()).includes(AUTH.user.email.toLowerCase());
+                AUTH.ready = true;
+                showLogin(false);
+                updateAuthUI();
+                try { filterLocomotives(); } catch (e) {}
+                if (isOnline) { warnedSyncFail = false; startCloud(); flushPending(); flushPendingImages(); scheduleImageMigration(); }
+            } else {
+                AUTH.user = null; AUTH.isAdmin = false; AUTH.ready = false;
+                showLogin(true);
+                updateAuthUI();
+            }
+        });
     }
 
     function getDefaultSeals(series = 'D13E') {
@@ -2178,6 +2301,7 @@
     }
 
     function triggerHistoryAutoRecovery() {
+        if (!requireAdmin()) return;
         checkAndAutoMigrateLocomotives();
         showToast('✅ Đã quét và tái khôi phục xong các số chì từ lịch sử!', 'success');
         closeModal('backupModal');
@@ -2193,6 +2317,7 @@
             .catch(err => showToast('❌ Lỗi đồng bộ: ' + err.message, 'error'));
     }
 
+    initAuth();
     initRealtimeListener();
 
     function getTodayDDMMYY() {
@@ -2223,7 +2348,7 @@
                         <button onclick="openLocoDetail('${escAttr(loc.number)}')" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-lg text-xs font-bold shadow-sm text-center">
                             🔍 Quản lý kẹp chì
                         </button>
-                        <button onclick="promptDeleteLoco('${escAttr(loc.number)}')" class="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-2 rounded-lg text-xs font-bold" title="Xóa đầu máy">🗑️</button>
+                        <button onclick="promptDeleteLoco('${escAttr(loc.number)}')" class="admin-only bg-red-50 hover:bg-red-100 text-red-600 px-3 py-2 rounded-lg text-xs font-bold" title="Xóa đầu máy">🗑️</button>
                     </div>
                 </div>
             `;
@@ -2232,13 +2357,14 @@
     }
 
     function promptDeleteLoco(locNumber) {
+        if (!requireAdmin()) return;
         const loc = locomotives.find(l => l.number === locNumber);
         if (!loc) return;
         const sealList = getSealArray(loc);
         let totalHistory = 0;
         sealList.forEach(s => { totalHistory += getHistoryArray(s).length; });
         const warn = `Xóa vĩnh viễn đầu máy ${locNumber}?\n\n⚠️ Sẽ mất:\n- ${sealList.length} vị trí kẹp chì\n- ${totalHistory} bản ghi lịch sử\n\nCó thể bấm “Hoàn tác” trong 10 giây sau khi xóa.`;
-        requestPasswordAuth(warn, () => {
+        requestConfirm(warn, () => {
             createSafetyBackup('delete_loco');
             logAudit('XÓA_ĐẦU_MÁY', { locoNumber: locNumber, positions: sealList.length, history: totalHistory });
             locomotives = locomotives.filter(l => l.number !== locNumber);
@@ -2317,8 +2443,8 @@
                             <p class="text-[11px] text-indigo-700 font-semibold">${esc(seal.layer)} · <b class="text-blue-600">${activeCount}</b> số chì đang dùng</p>
                         </div>
                         <div class="flex items-center gap-1">
-                            <button onclick="openRenamePositionModal(${sIdx})" class="text-indigo-600 hover:bg-indigo-50 text-xs font-bold px-2 py-1 rounded" title="Đổi tên vị trí">✏️ Đổi tên</button>
-                            <button onclick="promptDeletePosition(${sIdx})" class="text-gray-400 hover:text-red-600 text-xs font-bold px-2 py-1 rounded" title="Xóa vị trí">🗑️ Xóa</button>
+                            <button onclick="openRenamePositionModal(${sIdx})" class="admin-only text-indigo-600 hover:bg-indigo-50 text-xs font-bold px-2 py-1 rounded" title="Đổi tên vị trí">✏️ Đổi tên</button>
+                            <button onclick="promptDeletePosition(${sIdx})" class="admin-only text-gray-400 hover:text-red-600 text-xs font-bold px-2 py-1 rounded" title="Xóa vị trí">🗑️ Xóa</button>
                         </div>
                     </div>
                     <div class="flex flex-wrap gap-1.5 py-1">${activeHtml}</div>
@@ -2712,7 +2838,8 @@
     }
 
     function promptDeletePosition(sealIdx) {
-        requestPasswordAuth("Xóa vị trí kẹp chì này", () => {
+        if (!requireAdmin()) return;
+        requestConfirm("Xóa vị trí kẹp chì này", () => {
             let loc = locomotives[activeLocoIndex];
             let sealList = getSealArray(loc);
             createSafetyBackup('delete_position');
@@ -2791,6 +2918,7 @@
             seal.activeSeals = activeArr;
             let histArr = getHistoryArray(seal);
             histArr.unshift({
+                ...ownerStamp(),
                 date,
                 newSeal: newSealStr,
                 oldSeal: 'Thêm mới độc lập',
@@ -2829,12 +2957,15 @@
         if (currentList.length > 0) {
             currentList.forEach(code => {
                 container.innerHTML += `
-                    <label class="flex items-center gap-2 cursor-pointer bg-white p-2 rounded border shadow-sm">
-                        <input type="checkbox" name="oldSealCheckbox" value="${escAttr(code)}" class="rounded text-red-600 w-4 h-4">
-                        <span class="font-bold text-gray-800">Hủy con chì: <b class="text-red-600">${esc(code)}</b></span>
+                    <label class="flex items-center gap-2 ${ownedSealCodes(seal).has(code) ? 'cursor-pointer' : 'opacity-50 cursor-not-allowed'} bg-white p-2 rounded border shadow-sm">
+                        <input type="checkbox" name="oldSealCheckbox" value="${escAttr(code)}" class="rounded text-red-600 w-4 h-4" ${ownedSealCodes(seal).has(code) ? '' : 'disabled'}>
+                        <span class="font-bold text-gray-800">Hủy con chì: <b class="text-red-600">${esc(code)}</b>${ownedSealCodes(seal).has(code) ? '' : ' 🔒'}</span>
                     </label>
                 `;
             });
+            if (!isAdmin() && currentList.some(c => !ownedSealCodes(seal).has(c))) {
+                container.innerHTML += `<p class="text-[10px] text-gray-500 mt-1">🔒 Chì bị khóa: chỉ admin, hoặc chính người thêm trong vòng 30 phút, mới được thay/tháo.</p>`;
+            }
         } else {
             container.innerHTML = `<span class="text-gray-400 italic">Vị trí chưa có số chì nào.</span>`;
         }
@@ -2874,14 +3005,21 @@
         if (!seal.history) seal.history = [];
         if (!seal.activeSeals) seal.activeSeals = [];
         let activeArr = extractActiveSealsFromPosition(seal);
+        if (!isAdmin()) {
+            const _ow = ownedSealCodes(seal);
+            const _bad = selectedOld.filter(c => !_ow.has(c));
+            if (_bad.length) { denyToast('Không được thay/tháo chì ' + _bad.join(', ') + ' (không phải bạn thêm trong 30 phút qua).'); return; }
+        }
         createSafetyBackup('replace_seal');
         selectedOld.forEach(oldCode => { activeArr = activeArr.filter(c => c !== oldCode); });
         newCodesArr.forEach(c => { if (!activeArr.includes(c)) activeArr.push(c); });
         seal.activeSeals = activeArr;
 
         const processSave = (imgBase64 = null) => {
+            const pr = selectedOld.length > 0 ? pruneSealsFromEarlierHistory(seal, selectedOld) : { changed: 0, dropped: 0 };
             let histArr = getHistoryArray(seal);
             histArr.unshift({
+                ...ownerStamp(),
                 date,
                 newSeal: newSealStr,
                 oldSeal: selectedOld.length > 0 ? selectedOld.join(', ') : 'Không có',
@@ -2890,9 +3028,14 @@
             });
             seal.history = histArr;
             logAudit('THAY_CHÌ', { locoNumber: loc.number, sealName: seal.name, oldSeals: selectedOld, newSeals: newCodesArr, reason, date });
-            saveItem('loco', loc, '✅ Đã thay thế và lưu thành công!', { sensitive: true }).then(() => {
+            const locNoRp = loc.number;
+            saveItem('loco', loc, null, { sensitive: true }).then(() => {
                 closeModal('updateSealModal');
                 renderDetailView(loc);
+                offerUndo('✅ Đã thay chì' + (pr.changed ? ` (gỡ ${pr.changed} dòng lịch sử cũ)` : ''), { loco: locNoRp }, () => {
+                    const i = locomotives.findIndex(l => l.number === locNoRp);
+                    if (i !== -1) { activeLocoIndex = i; renderDetailView(locomotives[i]); }
+                });
             });
         };
 
@@ -2919,16 +3062,47 @@
         if (currentList.length > 0) {
             currentList.forEach(code => {
                 container.innerHTML += `
-                    <label class="flex items-center gap-2 cursor-pointer bg-white p-2 rounded border shadow-sm">
-                        <input type="checkbox" name="removeSealCheckbox" value="${escAttr(code)}" class="rounded text-red-600 w-4 h-4">
-                        <span class="font-bold text-gray-800">Tháo: <b class="text-red-600">${esc(code)}</b></span>
+                    <label class="flex items-center gap-2 ${ownedSealCodes(seal).has(code) ? 'cursor-pointer' : 'opacity-50 cursor-not-allowed'} bg-white p-2 rounded border shadow-sm">
+                        <input type="checkbox" name="removeSealCheckbox" value="${escAttr(code)}" class="rounded text-red-600 w-4 h-4" ${ownedSealCodes(seal).has(code) ? '' : 'disabled'}>
+                        <span class="font-bold text-gray-800">Tháo: <b class="text-red-600">${esc(code)}</b>${ownedSealCodes(seal).has(code) ? '' : ' 🔒'}</span>
                     </label>
                 `;
             });
+            if (!isAdmin() && currentList.some(c => !ownedSealCodes(seal).has(c))) {
+                container.innerHTML += `<p class="text-[10px] text-gray-500 mt-1">🔒 Chì bị khóa: chỉ admin, hoặc chính người thêm trong vòng 30 phút, mới được thay/tháo.</p>`;
+            }
         } else {
             container.innerHTML = `<span class="text-gray-400 italic">Không có chì để tháo.</span>`;
         }
         document.getElementById('removeSealModal').classList.remove('hidden');
+    }
+
+    // Khi THÁO hoặc THAY chì: gỡ số chì đó khỏi các dòng lịch sử cũ từng ghi nó là "chì mới"
+    // (tránh một con chì xuất hiện ở cả dòng lúc thêm lẫn dòng lúc tháo).
+    //  - dòng chỉ ghi việc thêm chì này  -> xóa dòng
+    //  - dòng có nhiều số chì            -> chỉ bỏ số đó khỏi dòng
+    //  - dòng thay chì (có chì cũ)       -> giữ dòng, phần "mới" ghi "Đã tháo trống"
+    // Số chì bị gỡ được ghi vào seal.usedLog (kèm ngày lắp) để mục Thống kê vẫn đếm đúng số chì đã dùng.
+    function pruneSealsFromEarlierHistory(seal, codes) {
+        const set = new Set(codes);
+        const kept = [];
+        let changed = 0, dropped = 0;
+        const used = Array.isArray(seal.usedLog) ? seal.usedLog.slice() : (seal.usedLog ? Object.values(seal.usedLog) : []);
+        getHistoryArray(seal).forEach(h => {
+            if (!h || !h.newSeal || h.newSeal === 'Đã tháo trống' || h.newSeal === 'Tháo dỡ') { kept.push(h); return; }
+            const nums = String(h.newSeal).match(CONFIG.SEAL_EXTRACT_REGEX);
+            if (!nums || !nums.some(n => set.has(n))) { kept.push(h); return; }
+            nums.filter(n => set.has(n)).forEach(n => used.push({ date: h.date || '', code: n }));
+            const rest = nums.filter(n => !set.has(n));
+            changed++;
+            if (rest.length > 0) { h.newSeal = rest.join(', '); kept.push(h); return; }
+            const oldHasSeal = h.oldSeal && (String(h.oldSeal).match(CONFIG.SEAL_EXTRACT_REGEX) || []).length > 0;
+            if (oldHasSeal) { h.newSeal = 'Đã tháo trống'; kept.push(h); }
+            else dropped++;
+        });
+        seal.history = kept;
+        if (used.length) seal.usedLog = used;
+        return { changed, dropped };
     }
 
     function confirmRemoveSeals(event) {
@@ -2945,11 +3119,18 @@
         if (!seal.history) seal.history = [];
         if (!seal.activeSeals) seal.activeSeals = [];
         let activeArr = extractActiveSealsFromPosition(seal);
+        if (!isAdmin()) {
+            const _ow = ownedSealCodes(seal);
+            const _bad = selectedToRemove.filter(c => !_ow.has(c));
+            if (_bad.length) { denyToast('Không được thay/tháo chì ' + _bad.join(', ') + ' (không phải bạn thêm trong 30 phút qua).'); return; }
+        }
         createSafetyBackup('remove_seal');
         selectedToRemove.forEach(code => { activeArr = activeArr.filter(c => c !== code); });
         seal.activeSeals = activeArr;
+        const pr = pruneSealsFromEarlierHistory(seal, selectedToRemove);
         let histArr = getHistoryArray(seal);
         histArr.unshift({
+            ...ownerStamp(),
             date,
             newSeal: 'Đã tháo trống',
             oldSeal: selectedToRemove.join(', '),
@@ -2958,14 +3139,21 @@
         });
         seal.history = histArr;
         logAudit('THÁO_CHÌ', { locoNumber: loc.number, sealName: seal.name, removed: selectedToRemove, reason, date });
-        saveItem('loco', loc, '🗑️ Đã tháo chì và lưu thành công!', { sensitive: true }).then(() => {
+        const locNoRm = loc.number;
+        saveItem('loco', loc, null, { sensitive: true }).then(() => {
             closeModal('removeSealModal');
             renderDetailView(loc);
+            offerUndo(`🗑️ Đã tháo ${selectedToRemove.length} chì` + (pr.changed ? ` (gỡ ${pr.changed} dòng lịch sử cũ)` : ''), { loco: locNoRm }, () => {
+                const i = locomotives.findIndex(l => l.number === locNoRm);
+                if (i !== -1) { activeLocoIndex = i; renderDetailView(locomotives[i]); }
+            });
         });
     }
 
     function openEditHistoryModal(sealIdx, histIdx) {
-        requestPasswordAuth("Sửa bản ghi lịch sử", () => {
+        {
+            const _seal = getSealArray(locomotives[activeLocoIndex])[sealIdx];
+            if (!canModifyEntry(getHistoryArray(_seal)[histIdx])) { denyEntry(); return; }
             activeSealIndex = sealIdx;
             activeEditHistoryIndex = histIdx;
             let sealList = getSealArray(locomotives[activeLocoIndex]);
@@ -2977,7 +3165,7 @@
             document.getElementById('editHistOldSeal').value = h.oldSeal || '';
             document.getElementById('editHistReason').value = h.reason || '';
             document.getElementById('editHistoryModal').classList.remove('hidden');
-        });
+        }
     }
 
     function saveEditedHistory(event) {
@@ -2986,6 +3174,7 @@
         let seal = sealList[activeSealIndex];
         let histArr = getHistoryArray(seal);
         let h = histArr[activeEditHistoryIndex];
+        if (!canModifyEntry(h)) { closeModal('editHistoryModal'); denyEntry(); return; }
         createSafetyBackup('edit_history');
         const beforeEdit = { date: h.date, newSeal: h.newSeal, oldSeal: h.oldSeal, reason: h.reason };
         h.date = document.getElementById('editHistDate').value.trim();
@@ -3043,12 +3232,13 @@
                             <span class="font-bold bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded">📅 ${escText(h.date)}</span>
                             <div class="flex gap-1 items-center">
                                 <span class="text-[10px] bg-indigo-900 text-white px-2 py-0.5 rounded font-semibold">${escText(h.positionName)}</span>
-                                <button onclick="openEditHistoryModal(${h.sealIdx}, ${h.histIdx})" class="text-blue-600 bg-blue-50 px-2.5 py-1 rounded font-semibold">✏️ Sửa</button>
+                                ${canModifyEntry(h) ? `<button onclick="openEditHistoryModal(${h.sealIdx}, ${h.histIdx})" class="text-blue-600 bg-blue-50 px-2.5 py-1 rounded font-semibold">✏️ Sửa</button>` : '<span class="text-[10px] text-gray-400 px-1">🔒</span>'}
                             </div>
                         </div>
                         <p class="text-emerald-700 font-bold">✅ Mới: ${escText(h.newSeal)}</p>
                         <p class="text-red-600 font-medium">🛑 Hủy/Tháo: ${escText(cleanOld)}</p>
                         <p class="text-gray-700">📝 Lý do: <i>${escText(h.reason)}</i></p>
+                        ${h.by ? `<p class="text-[10px] text-gray-400">👤 ${escText(h.by)}</p>` : ''}
                         ${imagesHtml}
                     </div>
                 `;
@@ -3081,13 +3271,14 @@
                         <div class="flex justify-between items-center">
                             <span class="font-bold bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded">📅 ${escText(h.date)}</span>
                             <div class="flex gap-1">
-                                <button onclick="openEditHistoryModal(${sealIdx}, ${hIdx})" class="text-blue-600 bg-blue-50 px-2.5 py-1 rounded font-semibold">✏️ Sửa</button>
-                                <button onclick="promptDeleteHistory(${sealIdx}, ${hIdx})" class="text-red-600 bg-red-50 px-2.5 py-1 rounded font-bold">🗑️ Xóa</button>
+                                ${canModifyEntry(h) ? `<button onclick="openEditHistoryModal(${sealIdx}, ${hIdx})" class="text-blue-600 bg-blue-50 px-2.5 py-1 rounded font-semibold">✏️ Sửa</button>
+                                <button onclick="promptDeleteHistory(${sealIdx}, ${hIdx})" class="text-red-600 bg-red-50 px-2.5 py-1 rounded font-bold">🗑️ Xóa</button>` : '<span class="text-[10px] text-gray-400 px-1">🔒 Khóa</span>'}
                             </div>
                         </div>
                         <p class="text-emerald-700 font-bold">✅ Mới: ${escText(h.newSeal)}</p>
                         <p class="text-red-600 font-medium">🛑 Hủy/Tháo: ${escText(cleanOld)}</p>
                         <p class="text-gray-700">📝 Lý do: <i>${escText(h.reason)}</i></p>
+                        ${h.by ? `<p class="text-[10px] text-gray-400">👤 ${escText(h.by)}</p>` : ''}
                         ${imagesHtml}
                     </div>
                 `;
@@ -3098,7 +3289,9 @@
     }
 
     function promptDeleteHistory(sealIdx, histIdx) {
-        requestPasswordAuth("Xóa bản ghi lịch sử này", () => {
+        const _seal = getSealArray(locomotives[activeLocoIndex])[sealIdx];
+        if (!canModifyEntry(getHistoryArray(_seal)[histIdx])) { denyEntry(); return; }
+        requestConfirm("Xóa bản ghi lịch sử này?\n(Có thể bấm “Hoàn tác” trong 10 giây.)", () => {
             let sealList = getSealArray(locomotives[activeLocoIndex]);
             let seal = sealList[sealIdx];
             let histArr = getHistoryArray(seal);
@@ -3234,6 +3427,7 @@
     function openAddPositionModal() { document.getElementById('addPositionModal').classList.remove('hidden'); }
     function saveNewPosition(event) {
         event.preventDefault();
+        if (!requireAdmin()) return;
         const layer = document.getElementById('newPosLayer').value;
         const name = document.getElementById('newPosName').value.trim();
         if (!name) return;
@@ -3248,20 +3442,7 @@
         });
     }
 
-    function openSettingsModal() { document.getElementById('settingsModal').classList.remove('hidden'); }
-    function saveNewPassword(event) {
-        event.preventDefault();
-        const oldPass = document.getElementById('oldPassInput').value;
-        const newPass = document.getElementById('newPassInput').value;
-        const confirmPass = document.getElementById('confirmPassInput').value;
-        const currentPass = localStorage.getItem(CONFIG.STORAGE_KEYS.ADMIN_PASS) || CONFIG.DEFAULT_PASSWORD;
-        const errEl = document.getElementById('passErrorMsg');
-        if (oldPass !== currentPass) { errEl.innerText = "Mật khẩu hiện tại không đúng!"; errEl.classList.remove('hidden'); return; }
-        if (newPass !== confirmPass) { errEl.innerText = "Xác nhận không khớp!"; errEl.classList.remove('hidden'); return; }
-        localStorage.setItem(CONFIG.STORAGE_KEYS.ADMIN_PASS, newPass);
-        showToast('🔑 Đổi mật khẩu thành công!', 'success');
-        closeModal('settingsModal');
-    }
+    function openSettingsModal() { updateAuthUI(); document.getElementById('settingsModal').classList.remove('hidden'); }
 
     function openStatsModal() {
         document.getElementById('statsFromDate').value = "01/01/26";
@@ -3287,6 +3468,12 @@
                         const matched = String(h.newSeal || '').match(CONFIG.SEAL_EXTRACT_REGEX);
                         if (matched) totalCount += matched.length;
                     }
+                });
+                // chì đã bị gỡ khỏi lịch sử khi tháo/thay vẫn tính theo ngày lắp
+                const usedLog = Array.isArray(seal.usedLog) ? seal.usedLog : (seal.usedLog ? Object.values(seal.usedLog) : []);
+                usedLog.forEach(u => {
+                    const uDate = parseDate(u && u.date || '');
+                    if (uDate && uDate >= fromDate && uDate <= toDate) totalCount++;
                 });
             });
         });
@@ -3316,6 +3503,7 @@
         finally { hideLoading(); }
     }
     function importDataJSON(event) {
+        if (!requireAdmin()) { try { event.target.value = ''; } catch (e) {} return; }
         const file = event.target.files[0];
         if (!file) return;
         const reader = new FileReader();
@@ -3330,7 +3518,7 @@
                 if (arr.length === 0 || valid.length !== arr.length) {
                     showToast('❌ File JSON không hợp lệ (thiếu số hiệu hoặc danh sách vị trí)!', 'error');
                 } else {
-                    requestPasswordAuth(`Khôi phục từ file: ${valid.length} đầu máy trong file sẽ ghi đè các đầu máy trùng số hiệu (đầu máy khác giữ nguyên). Tiếp tục?`, () => {
+                    requestConfirm(`Khôi phục từ file: ${valid.length} đầu máy trong file sẽ ghi đè các đầu máy trùng số hiệu (đầu máy khác giữ nguyên). Tiếp tục?`, () => {
                         createSafetyBackup('import_json');
                         Object.keys(images).forEach(ref => { if (isImageRef(ref) && images[ref]) storeImage(images[ref], ref); });   // ảnh trước, đầu máy sau
                         const n = upsertItems('loco', valid, false);
@@ -3542,6 +3730,7 @@
 
 
     function openRenamePositionModal(sealIdx) {
+        if (!requireAdmin()) return;
         activeSealIndex = sealIdx;
         const loc = locomotives[activeLocoIndex];
         const sealList = getSealArray(loc);
@@ -3556,6 +3745,7 @@
 
     function saveRenamedPosition(event) {
         event.preventDefault();
+        if (!requireAdmin()) return;
         const newLayer = document.getElementById('renamePosLayer').value;
         const newName = document.getElementById('renamePosNameInput').value.trim();
         if (!newName) return;
@@ -3660,6 +3850,7 @@
         }
 
         const newIssue = {
+            ...ownerStamp(),
             id: Date.now(),
             receiverUnit,
             soHieu,
@@ -3722,7 +3913,8 @@
     }
 
     function promptDeleteStationIssue(issueId) {
-        requestPasswordAuth("Xóa phiếu cấp phát chì này", () => {
+        if (!canModifyEntry(stationIssues.find(i => i.id === issueId))) { denyEntry(); return; }
+        requestConfirm("Xóa phiếu cấp phát chì này?\n(Có thể bấm “Hoàn tác” trong 10 giây.)", () => {
             createSafetyBackup('delete_station_issue');
             const removedIssue = stationIssues.find(i => i.id === issueId) || {};
             logAudit('XÓA_PHIẾU_XUẤT', { id: issueId, receiverUnit: removedIssue.receiverUnit, soHieu: removedIssue.soHieu, ngay: removedIssue.ngay, seals: removedIssue.seals });
