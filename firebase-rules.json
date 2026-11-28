@@ -6,7 +6,7 @@
     "locomotives_v2": {
       ".read": "auth != null",
       "$id": {
-        ".write": "auth != null && (newData.exists() || auth.token.email.toLowerCase() == 'dán-email-admin@gmail.com')"
+        ".write": "auth != null && (newData.exists() || auth.token.email.toLowerCase() == 'uyphong2011@gmail.com')"
       }
     },
 
@@ -23,7 +23,7 @@
     "station_issues": { ".read": "auth != null", ".write": false },
 
     "audit_log": {
-      ".read": "auth != null && auth.token.email.toLowerCase() == 'dán-email-admin@gmail.com'",
+      ".read": "auth != null && auth.token.email.toLowerCase() == 'uyphong2011@gmail.com'",
       "$id": { ".write": "auth != null && !data.exists()" }
     }
   }
