@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Quản Lý Kẹp Chì Đầu Máy v16.8</title>
+    <title>Quản Lý Kẹp Chì Đầu Máy v16.10</title>
     <meta name="author" content="Triệu Việt Phương">
     <meta name="copyright" content="© 2026 Triệu Việt Phương. All rights reserved.">
     <meta name="theme-color" content="#312e81">
     <link rel="manifest" href="manifest.webmanifest">
-    <link rel="icon" type="image/png" sizes="48x48" href="icons/favicon-48.png">
-    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="48x48" href="favicon-48.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Kẹp Chì">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="application-version" content="16.8">
+    <meta name="application-version" content="16.10">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -254,7 +254,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 font-sans min-h-screen pb-12 flex flex-col justify-between text-gray-800">
+<body class="bg-gray-100 font-sans min-h-screen pb-20 md:pb-12 flex flex-col justify-between text-gray-800">
 
     <div id="offlineBanner">🔴 Mất kết nối đám mây — Đang chạy ngoại tuyến trên ổ cứng máy!</div>
     <div id="toastContainer"></div>
@@ -265,12 +265,13 @@
                 <span class="text-xl">🛡️</span>
                 <div>
                     <h1 class="text-sm md:text-lg font-bold leading-tight">QUẢN LÝ KẸP CHÌ ĐẦU MÁY</h1>
-                    <p class="text-[10px] text-indigo-200">v16.8 - Lưu ổ cứng & Đám mây</p>
+                    <p class="text-[10px] text-indigo-200">v16.10 · <span id="syncStatus" class="font-semibold">...</span></p>
                 </div>
             </div>
-            <div class="flex items-center gap-1.5">
-                <button id="btnInstallPwa" onclick="installPwa()" class="hidden bg-white text-indigo-900 hover:bg-indigo-50 px-2.5 py-1.5 rounded-lg text-xs font-bold shadow">📲 Cài app</button>
+            <div class="hidden md:flex items-center gap-1.5">
+                <button id="btnInstallPwa" onclick="installPwa()" class="js-install-btn hidden bg-white text-indigo-900 hover:bg-indigo-50 px-2.5 py-1.5 rounded-lg text-xs font-bold shadow">📲 Cài app</button>
                 <button onclick="syncFromServer()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold shadow flex items-center gap-1">🔄 Đồng bộ</button>
+                <button onclick="openLookupModal()" class="bg-cyan-600 hover:bg-cyan-500 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold shadow">🔎 Tra chì</button>
                 <button id="btnAccount" onclick="openSettingsModal()" class="bg-indigo-800 hover:bg-indigo-700 text-white px-2 py-1.5 rounded-lg text-xs shadow">👤 Tài khoản</button>
                 <button onclick="openStatsModal()" class="bg-amber-500 hover:bg-amber-400 text-indigo-950 px-2.5 py-1.5 rounded-lg text-xs font-bold shadow">📈 Thống kê</button>
             </div>
@@ -284,11 +285,11 @@
                     <button onclick="openAddLocoModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-xs font-bold shadow flex items-center gap-1">
                         + Thêm đầu máy
                     </button>
-                    <button onclick="openStationModal()" class="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg text-xs font-bold shadow flex items-center gap-1">
+                    <button onclick="openStationModal()" class="hidden md:flex bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg text-xs font-bold shadow flex items-center gap-1">
                         📦 Quản lý xuất trạm & Biên bản
                     </button>
                 </div>
-                <div class="flex gap-2">
+                <div class="hidden md:flex gap-2">
                     <button onclick="exportSealsCSV()" class="bg-cyan-700 hover:bg-cyan-800 text-white px-3.5 py-2 rounded-lg text-xs font-bold shadow flex items-center gap-1">
                         📊 Xuất CSV
                     </button>
@@ -330,9 +331,10 @@
                     <button onclick="openGlobalHistoryModal()" class="bg-amber-500 hover:bg-amber-600 text-indigo-950 px-3 py-2 rounded-lg text-xs font-bold shadow">📜 Toàn bộ lịch sử</button>
                 </div>
             </div>
-            <p class="text-xs text-gray-500 bg-indigo-50 border border-indigo-100 p-2.5 rounded-lg">
-                💡 Tích chọn các vị trí niêm phong chì để đưa vào biên bản chính thức.
+            <p class="text-xs text-gray-600 bg-indigo-50 border border-indigo-100 p-2.5 rounded-lg">
+                💡 Chạm vào số chì để chọn (chọn được nhiều con), rồi bấm <b>Thay</b> hoặc <b>Tháo</b>.
             </p>
+            <input id="positionFilterInput" type="text" oninput="onPositionFilter(this.value)" autocomplete="off" placeholder="🔍 Lọc vị trí hoặc số chì trong đầu máy này..." class="w-full px-3 py-2 border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
             <div id="sealPositionsListNew" class="space-y-3"></div>
             <div class="pt-4 pb-2">
                 <button onclick="backToLocoList()" class="w-full bg-gray-800 hover:bg-gray-900 text-white py-3 rounded-xl text-xs font-extrabold shadow-md flex items-center justify-center gap-2">
@@ -493,7 +495,7 @@
     </main>
 
     <footer class="bg-white border-t py-3 text-center text-[11px] text-gray-500 mt-6 shadow-inner no-print">
-        <p>Hệ thống Quản lý Niêm Phong Kẹp Chì Đầu Máy (v16.8) | Bản quyền © 2026 thuộc về <strong class="text-indigo-900">Triệu Việt Phương</strong>. All rights reserved.</p>
+        <p>Hệ thống Quản lý Niêm Phong Kẹp Chì Đầu Máy (v16.10) | Bản quyền © 2026 thuộc về <strong class="text-indigo-900">Triệu Việt Phương</strong>. All rights reserved.</p>
     </footer>
 
     <div id="bienBanConfigModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center p-3 z-[85]">
@@ -553,6 +555,39 @@
             </form>
         </div>
     </div>
+    <nav id="bottomNav" class="md:hidden fixed bottom-0 inset-x-0 bg-white border-t shadow-lg z-40 no-print">
+        <div class="grid grid-cols-5 text-[10px] font-semibold text-gray-600">
+            <button onclick="navHome()" class="py-2 flex flex-col items-center gap-0.5 active:bg-indigo-50"><span class="text-xl leading-none">🏠</span>Đầu máy</button>
+            <button onclick="openLookupModal()" class="py-2 flex flex-col items-center gap-0.5 active:bg-indigo-50"><span class="text-xl leading-none">🔎</span>Tra chì</button>
+            <button onclick="openStationModal()" class="py-2 flex flex-col items-center gap-0.5 active:bg-indigo-50"><span class="text-xl leading-none">📦</span>Cấp phát</button>
+            <button onclick="openStatsModal()" class="py-2 flex flex-col items-center gap-0.5 active:bg-indigo-50"><span class="text-xl leading-none">📈</span>Thống kê</button>
+            <button onclick="openMoreMenu()" class="py-2 flex flex-col items-center gap-0.5 active:bg-indigo-50"><span class="text-xl leading-none">☰</span>Khác</button>
+        </div>
+    </nav>
+
+    <div id="moreMenuModal" class="fixed inset-0 bg-black bg-opacity-60 hidden flex items-end md:items-center justify-center z-[85]" onclick="if(event.target===this)closeModal('moreMenuModal')">
+        <div class="bg-white rounded-t-2xl md:rounded-xl w-full max-w-sm p-4 shadow-2xl">
+            <h3 class="text-sm font-bold text-indigo-900 mb-3 text-center">☰ Thêm chức năng</h3>
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="closeModal('moreMenuModal');syncFromServer()" class="bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-xl py-3 text-xs font-bold">🔄 Đồng bộ ngay</button>
+                <button onclick="closeModal('moreMenuModal');exportSealsCSV()" class="bg-cyan-50 border border-cyan-200 text-cyan-900 rounded-xl py-3 text-xs font-bold">📊 Xuất CSV</button>
+                <button onclick="closeModal('moreMenuModal');openBackupModal()" class="bg-indigo-50 border border-indigo-200 text-indigo-900 rounded-xl py-3 text-xs font-bold">💾 Sao lưu / Khôi phục</button>
+                <button onclick="closeModal('moreMenuModal');openSettingsModal()" class="bg-gray-50 border border-gray-200 text-gray-800 rounded-xl py-3 text-xs font-bold">👤 Tài khoản</button>
+                <button onclick="closeModal('moreMenuModal');installPwa()" class="js-install-btn hidden col-span-2 bg-white border-2 border-indigo-300 text-indigo-900 rounded-xl py-3 text-xs font-bold">📲 Cài app lên màn hình</button>
+            </div>
+            <button onclick="closeModal('moreMenuModal')" class="w-full mt-3 py-2 bg-gray-200 rounded-lg text-xs">Đóng</button>
+        </div>
+    </div>
+
+    <div id="lookupModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center p-3 z-[85]">
+        <div class="bg-white rounded-xl max-w-md w-full p-4 shadow-2xl max-h-[90vh] flex flex-col">
+            <h3 class="text-base font-bold text-indigo-900 mb-2">🔎 Tra cứu số chì</h3>
+            <input id="lookupInput" type="text" inputmode="numeric" autocomplete="off" oninput="runLookup()" placeholder="Nhập số chì (từ 3 chữ số)" class="w-full px-3 py-2.5 border-2 border-indigo-400 rounded-lg text-base font-bold tracking-wider focus:outline-none">
+            <div id="lookupResults" class="flex-1 overflow-y-auto space-y-2 mt-3 text-xs"></div>
+            <button type="button" onclick="closeModal('lookupModal')" class="w-full mt-3 py-2 bg-gray-200 rounded-lg text-xs">Đóng</button>
+        </div>
+    </div>
+
     <div id="loginOverlay" class="fixed inset-0 bg-indigo-950 hidden flex items-center justify-center p-4 z-[300]">
         <form onsubmit="doLogin(event)" class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl">
             <div class="text-center mb-4">
@@ -1587,7 +1622,7 @@
     window.addEventListener('pagehide', () => { if (persistTimer) { clearTimeout(persistTimer); flushLocal(); } });
 
         function readPending() { return readJSON(SAFETY_KEYS.PENDING, {}); }
-    function writePending(p) { try { localStorage.setItem(SAFETY_KEYS.PENDING, JSON.stringify(p)); } catch (e) {} }
+    function writePending(p) { try { localStorage.setItem(SAFETY_KEYS.PENDING, JSON.stringify(p)); } catch (e) {} try { updateSyncStatus(); } catch (e) {} }
     function setPending(col, key, op) { const p = readPending(); p[col + ':' + key] = { col, key, op }; writePending(p); }
     function clearPending(col, key, op) {
         const p = readPending(), e = p[col + ':' + key];
@@ -1908,6 +1943,7 @@
         if (banner) banner.style.display = online ? 'none' : 'block';
         document.body.classList.toggle('is-offline', !online);
         isOnline = online;
+        try { updateSyncStatus(); } catch (e) {}
         if (!online) showToast('🔴 Mất kết nối đám mây — Đang dùng dữ liệu trên ổ cứng!', 'warn');
         if (online && AUTH.ready) { warnedSyncFail = false; startCloud(); flushPending(); flushPendingImages(); scheduleImageMigration(); }
     });
@@ -2159,7 +2195,7 @@
         if (info) info.textContent = email;
         if (note) note.textContent = isAdmin()
             ? 'Quyền: Admin — sửa/xóa được mọi dữ liệu.'
-            : 'Quyền: Người nhập liệu — được thêm chì; chỉ sửa/xóa số chì do chính bạn thêm trong vòng 30 phút. Việc khác cần admin.';
+            : 'Quyền: Người nhập liệu — được thêm chì; chỉ sửa/xóa số chì do chính bạn thêm trong vòng 30 phút. Vẫn xem được đầy đủ và xuất biên bản bình thường.';
         if (logout) logout.classList.remove('hidden');
     }
     function authErrorText(err) {
@@ -2320,9 +2356,110 @@
     initAuth();
     initRealtimeListener();
 
+    // ---------- Trạng thái đồng bộ ----------
+    function updateSyncStatus() {
+        const el = document.getElementById('syncStatus');
+        if (!el) return;
+        let n = 0;
+        try { n = Object.keys(readPending()).length + readPendingImgs().length; } catch (e) {}
+        let txt, cls;
+        if (AUTH.enabled && !AUTH.ready) { txt = '🔒 Chưa đăng nhập'; cls = 'text-amber-300'; }
+        else if (!isOnline) { txt = n ? `🔴 Ngoại tuyến · ${n} chờ gửi` : '🔴 Ngoại tuyến'; cls = 'text-red-300'; }
+        else if (n > 0) { txt = `⏳ ${n} thay đổi đang gửi`; cls = 'text-amber-300'; }
+        else { txt = '✅ Đã đồng bộ'; cls = 'text-emerald-300'; }
+        el.textContent = txt;
+        el.className = cls + ' font-semibold';
+    }
+    setInterval(updateSyncStatus, 2000);
+    updateSyncStatus();
+
+    // ---------- Thanh điều hướng dưới + menu "Khác" ----------
+    function navHome() {
+        const bb = document.getElementById('bienBanPrintView');
+        if (bb && !bb.classList.contains('hidden')) { try { closeBienBanView(); } catch (e) {} }
+        backToLocoList();
+    }
+    function openMoreMenu() { document.getElementById('moreMenuModal').classList.remove('hidden'); }
+
+    // ---------- Tra cứu số chì (đang dùng + toàn bộ lịch sử) ----------
+    function openLookupModal() {
+        closeModal('moreMenuModal');
+        const input = document.getElementById('lookupInput');
+        input.value = '';
+        runLookup();
+        document.getElementById('lookupModal').classList.remove('hidden');
+        setTimeout(() => input.focus(), 100);
+    }
+    function openLocoFromLookup(num) {
+        closeModal('lookupModal');
+        const bb = document.getElementById('bienBanPrintView');
+        if (bb && !bb.classList.contains('hidden')) { try { closeBienBanView(); } catch (e) {} }
+        openLocoDetail(num);
+    }
+    function runLookup() {
+        const q = document.getElementById('lookupInput').value.replace(/\D/g, '');
+        const box = document.getElementById('lookupResults');
+        if (q.length < 3) { box.innerHTML = `<p class="text-center text-gray-400 py-6">Nhập ít nhất 3 chữ số để tra.</p>`; return; }
+        const byCode = new Map();
+        const get = c => { if (!byCode.has(c)) byCode.set(c, { active: [], events: [] }); return byCode.get(c); };
+        const RE = CONFIG.SEAL_EXTRACT_REGEX;
+        locomotives.forEach(loc => getSealArray(loc).forEach(seal => {
+            extractActiveSealsFromPosition(seal).forEach(c => { if (c.includes(q)) get(c).active.push({ loco: loc.number, pos: seal.name }); });
+            getHistoryArray(seal).forEach(h => {
+                const nw = (h.newSeal && h.newSeal !== 'Đã tháo trống' && h.newSeal !== 'Tháo dỡ') ? (String(h.newSeal).match(RE) || []) : [];
+                const od = String(h.oldSeal || '').match(RE) || [];
+                nw.forEach(c => { if (c.includes(q)) get(c).events.push({ type: 'in', date: h.date, loco: loc.number, pos: seal.name, reason: h.reason }); });
+                od.forEach(c => { if (c.includes(q)) get(c).events.push({ type: 'out', date: h.date, loco: loc.number, pos: seal.name, reason: h.reason }); });
+            });
+            const ul = Array.isArray(seal.usedLog) ? seal.usedLog : (seal.usedLog ? Object.values(seal.usedLog) : []);
+            ul.forEach(u => { if (u && u.code && String(u.code).includes(q)) get(u.code).events.push({ type: 'in', date: u.date, loco: loc.number, pos: seal.name, reason: '' }); });
+        }));
+        if (byCode.size === 0) { box.innerHTML = `<p class="text-center text-gray-400 py-6">Không có số chì nào chứa "${esc(q)}".</p>`; return; }
+        const codes = [...byCode.keys()].sort();
+        const MAXC = 20;
+        let html = '';
+        codes.slice(0, MAXC).forEach(c => {
+            const it = byCode.get(c);
+            it.events.sort((a, b) => ((parseDate(b.date || '') || 0) - (parseDate(a.date || '') || 0)));
+            html += `<div class="border rounded-xl p-3 bg-gray-50 space-y-1.5">
+                <p class="text-sm font-extrabold text-gray-800">${esc(c)}</p>`;
+            if (it.active.length) {
+                it.active.forEach(a => {
+                    html += `<div class="flex items-center justify-between gap-2 bg-emerald-50 border border-emerald-200 rounded-lg px-2 py-1.5">
+                        <span class="text-emerald-800 font-bold">🟢 Đang dùng: ${esc(a.loco)} · ${esc(a.pos)}</span>
+                        <button type="button" onclick="openLocoFromLookup('${escAttr(a.loco)}')" class="bg-emerald-600 text-white px-2.5 py-1 rounded font-bold">Mở</button>
+                    </div>`;
+                });
+            } else {
+                html += `<p class="text-gray-500">⚪ Hiện không còn được dùng.</p>`;
+            }
+            it.events.slice(0, 8).forEach(e => {
+                html += `<p class="${e.type === 'in' ? 'text-emerald-700' : 'text-red-600'}">${e.type === 'in' ? '✅ Lắp' : '🛑 Tháo/Hủy'} · 📅 ${esc(e.date || '?')} · ${esc(e.loco)} · ${esc(e.pos)}${e.reason ? ` <i class="text-gray-500">(${esc(e.reason)})</i>` : ''}</p>`;
+            });
+            if (it.events.length > 8) html += `<p class="text-gray-400">… và ${it.events.length - 8} dòng lịch sử khác</p>`;
+            html += `</div>`;
+        });
+        if (codes.length > MAXC) html += `<p class="text-center text-gray-400">Còn ${codes.length - MAXC} số khác — gõ thêm chữ số để thu hẹp.</p>`;
+        box.innerHTML = html;
+    }
+
     function getTodayDDMMYY() {
         const now = new Date();
         return `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getFullYear()).slice(-2)}`;
+    }
+
+    function locoStats(sealList) {
+        let total = 0, empty = 0, last = null, lastStr = '';
+        sealList.forEach(sl => {
+            const a = extractActiveSealsFromPosition(sl);
+            total += a.length;
+            if (!a.length) empty++;
+            getHistoryArray(sl).forEach(h => {
+                const dt = parseDate(h.date || '');
+                if (dt && (!last || dt > last)) { last = dt; lastStr = h.date; }
+            });
+        });
+        return { total, empty, lastStr };
     }
 
     function renderLocoCards(data) {
@@ -2335,14 +2472,20 @@
         let parts = '';
         data.forEach((loc) => {
             let sealList = getSealArray(loc);
+            const st = locoStats(sealList);
             parts += `
-                <div class="bg-white border p-4 rounded-xl shadow-sm flex flex-col justify-between hover:border-blue-400 transition-all">
+                <div class="bg-white border ${st.empty ? 'border-amber-400' : ''} p-4 rounded-xl shadow-sm flex flex-col justify-between hover:border-blue-400 transition-all">
                     <div>
                         <div class="flex justify-between items-center mb-1.5">
                             <span class="px-2 py-0.5 bg-blue-50 text-blue-800 text-[11px] font-extrabold rounded border border-blue-100">${esc(loc.series)}</span>
                             <span class="text-xs text-gray-500 font-semibold">🛡️ ${sealList.length} vị trí</span>
                         </div>
                         <h3 class="text-xl font-black text-blue-800 tracking-wide bg-blue-50/50 px-3 py-1.5 rounded-lg border border-blue-200 text-center my-2 shadow-inner">${esc(loc.number)}</h3>
+                        <div class="text-[11px] text-gray-600 space-y-0.5 mt-2">
+                            <p>🏷️ <b>${st.total}</b> chì đang dùng</p>
+                            <p>🕒 Thay gần nhất: <b>${esc(st.lastStr || '—')}</b></p>
+                            ${st.empty ? `<p class="text-amber-700 font-bold">⚠️ ${st.empty} vị trí chưa có chì</p>` : ''}
+                        </div>
                     </div>
                     <div class="mt-4 pt-3 border-t flex items-center gap-1.5">
                         <button onclick="openLocoDetail('${escAttr(loc.number)}')" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-lg text-xs font-bold shadow-sm text-center">
@@ -2396,6 +2539,9 @@
         const idx = locomotives.findIndex(l => l.number === locNumber);
         if (idx === -1) return;
         activeLocoIndex = idx;
+        clearSealSelection();
+        positionFilterText = '';
+        { const pf = document.getElementById('positionFilterInput'); if (pf) pf.value = ''; }
         renderDetailView(locomotives[idx]);
         document.getElementById('locoCardsView').classList.add('hidden');
         document.getElementById('dashboardFilterSection').classList.add('hidden');
@@ -2405,6 +2551,7 @@
 
     function backToLocoList() {
         activeLocoIndex = -1;
+        clearSealSelection();
         document.getElementById('locoDetailView').classList.add('hidden');
         document.getElementById('dashboardFilterSection').classList.remove('hidden');
         document.getElementById('locoCardsView').classList.remove('hidden');
@@ -2412,53 +2559,131 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    // ---------- Màn chi tiết đầu máy: nhóm theo lớp, chạm chọn nhiều con chì ----------
+    let selectedSeals = {};          // sealIdx -> Set(số chì đang chọn)
+    let positionFilterText = '';
+    const layerOpen = {};            // lớp -> đang mở? (mặc định mở)
+    function clearSealSelection() { selectedSeals = {}; }
+    function currentLoco() { return locomotives[activeLocoIndex]; }
+    function toggleSealChip(sIdx, code) {
+        const loc = currentLoco(); if (!loc) return;
+        const seal = getSealArray(loc)[sIdx]; if (!seal) return;
+        if (!ownedSealCodes(seal).has(code)) return;
+        const set = selectedSeals[sIdx] || (selectedSeals[sIdx] = new Set());
+        if (set.has(code)) set.delete(code); else set.add(code);
+        renderDetailView(loc);
+    }
+    function selectAllSeals(sIdx) {
+        const loc = currentLoco(); if (!loc) return;
+        const seal = getSealArray(loc)[sIdx]; if (!seal) return;
+        selectedSeals[sIdx] = new Set(ownedSealCodes(seal));
+        renderDetailView(loc);
+    }
+    function clearPositionSelection(sIdx) {
+        delete selectedSeals[sIdx];
+        const loc = currentLoco(); if (loc) renderDetailView(loc);
+    }
+    function onPositionFilter(v) {
+        positionFilterText = v || '';
+        const loc = currentLoco(); if (loc) renderDetailView(loc);
+    }
+
+    function renderPositionCard(seal, sIdx, activeArr) {
+        const sel = selectedSeals[sIdx] || new Set();
+        const owned = ownedSealCodes(seal);
+        const selArr = activeArr.filter(c => sel.has(c));
+        const historyList = getHistoryArray(seal);
+        let chips = '';
+        if (activeArr.length > 0) {
+            activeArr.forEach(code => {
+                const isSel = sel.has(code), can = owned.has(code);
+                const base = 'px-3 py-2 border text-sm font-extrabold rounded-lg shadow-sm';
+                if (!can) {   // chỉ xem: không bấm được để thay/tháo
+                    chips += `<span class="${base} bg-emerald-50 text-emerald-800 border-emerald-200">${esc(code)}</span>`;
+                    return;
+                }
+                const cls = isSel ? 'bg-indigo-600 text-white border-indigo-700 ring-2 ring-indigo-300'
+                    : 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100';
+                chips += `<button type="button" onclick="toggleSealChip(${sIdx}, '${escAttr(code)}')" class="${base} ${cls}">${isSel ? '✔ ' : ''}${esc(code)}</button>`;
+            });
+        } else {
+            chips = `<span class="text-gray-400 italic text-xs">Chưa có số chì đang sử dụng.</span>`;
+        }
+        let bar = '';
+        if (selArr.length > 0) {
+            bar = `<div class="flex flex-wrap items-center gap-2 bg-indigo-50 border border-indigo-200 rounded-lg p-2">
+                <span class="text-xs font-bold text-indigo-900">Đã chọn ${selArr.length} con</span>
+                <button onclick="openUpdateSealModal(${sIdx})" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow">🔄 Thay</button>
+                <button onclick="openRemoveSealModal(${sIdx})" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow">🛑 Tháo</button>
+                ${selArr.length < owned.size ? `<button onclick="selectAllSeals(${sIdx})" class="text-indigo-700 text-xs font-bold px-2 py-1">Chọn hết</button>` : ''}
+                <button onclick="clearPositionSelection(${sIdx})" class="text-gray-500 text-xs font-bold px-2 py-1">✕ Bỏ chọn</button>
+            </div>`;
+        } else if (activeArr.length > 1 && owned.size > 1) {
+            bar = `<button onclick="selectAllSeals(${sIdx})" class="text-indigo-700 text-[11px] font-bold">☑ Chọn hết ${owned.size} con</button>`;
+        }
+        return `
+            <div class="bg-white border p-4 rounded-xl shadow-sm space-y-3">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h4 class="font-extrabold text-gray-800 text-sm md:text-base">${esc(seal.name)}</h4>
+                        <p class="text-[11px] text-indigo-700 font-semibold">${esc(seal.layer)} · <b class="text-blue-600">${activeArr.length}</b> số chì đang dùng</p>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button onclick="openRenamePositionModal(${sIdx})" class="admin-only text-indigo-600 hover:bg-indigo-50 text-xs font-bold px-2 py-1 rounded" title="Đổi tên vị trí">✏️ Đổi tên</button>
+                        <button onclick="promptDeletePosition(${sIdx})" class="admin-only text-gray-400 hover:text-red-600 text-xs font-bold px-2 py-1 rounded" title="Xóa vị trí">🗑️ Xóa</button>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-2 py-1">${chips}</div>
+                ${bar}
+                <div class="flex flex-wrap gap-2 pt-2 border-t">
+                    <button onclick="openAddSingleSealModal(${sIdx})" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-lg text-xs font-bold shadow">+ Thêm chì</button>
+                    <button onclick="openHistoryModal(${sIdx})" class="bg-amber-200 hover:bg-amber-300 text-amber-950 font-extrabold px-3 py-2 rounded-lg text-xs shadow">📜 Lịch sử (${historyList.length})</button>
+                </div>
+            </div>`;
+    }
+
     function renderDetailView(loc) {
         document.getElementById('detailLocoNumberTitle').innerText = loc.number;
-        let sealList = getSealArray(loc);
-        document.getElementById('detailLocoSubInfo').innerText = `${loc.series} · ${sealList.length} vị trí`;
+        const sealList = getSealArray(loc);
+        const st = locoStats(sealList);
+        document.getElementById('detailLocoSubInfo').innerText = `${loc.series} · ${sealList.length} vị trí · ${st.total} chì đang dùng`;
         const container = document.getElementById('sealPositionsListNew');
-        container.innerHTML = '';
         if (sealList.length === 0) {
             container.innerHTML = `<p class="text-center text-gray-400 py-6 text-xs bg-white rounded-xl">Chưa có vị trí kẹp chì nào.</p>`;
             return;
         }
-        let parts = '';
+        const filter = positionFilterText.trim().toLowerCase();
+        const groups = [], map = {};
         sealList.forEach((seal, sIdx) => {
-            let activeArr = extractActiveSealsFromPosition(seal);
-            let activeHtml = '';
-            let activeCount = activeArr.length;
-            if (activeCount > 0) {
-                activeArr.forEach(code => {
-                    activeHtml += `<span class="px-2.5 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-extrabold rounded-lg shadow-sm">${esc(code)}</span>`;
-                });
-            } else {
-                activeHtml = `<span class="text-gray-400 italic text-xs">Chưa có số chì đang sử dụng.</span>`;
-            }
-            let historyList = getHistoryArray(seal);
-            parts += `
-                <div class="bg-white border p-4 rounded-xl shadow-sm space-y-3">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h4 class="font-extrabold text-gray-800 text-sm md:text-base">${esc(seal.name)}</h4>
-                            <p class="text-[11px] text-indigo-700 font-semibold">${esc(seal.layer)} · <b class="text-blue-600">${activeCount}</b> số chì đang dùng</p>
-                        </div>
-                        <div class="flex items-center gap-1">
-                            <button onclick="openRenamePositionModal(${sIdx})" class="admin-only text-indigo-600 hover:bg-indigo-50 text-xs font-bold px-2 py-1 rounded" title="Đổi tên vị trí">✏️ Đổi tên</button>
-                            <button onclick="promptDeletePosition(${sIdx})" class="admin-only text-gray-400 hover:text-red-600 text-xs font-bold px-2 py-1 rounded" title="Xóa vị trí">🗑️ Xóa</button>
-                        </div>
-                    </div>
-                    <div class="flex flex-wrap gap-1.5 py-1">${activeHtml}</div>
-                    <div class="flex flex-wrap gap-2 pt-2 border-t">
-                        <button onclick="openAddSingleSealModal(${sIdx})" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow">+ Thêm chì</button>
-                        <button onclick="openUpdateSealModal(${sIdx})" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow">Thay chì</button>
-                        
-                        <button onclick="openRemoveSealModal(${sIdx})" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow">Tháo chì</button>
-                        <button onclick="openHistoryModal(${sIdx})" class="bg-amber-200 hover:bg-amber-300 text-amber-950 font-extrabold px-3 py-1.5 rounded-lg text-xs shadow">📜 Lịch sử (${historyList.length})</button>
-                    </div>
-                </div>
-            `;
+            const layer = seal.layer || 'Khác';
+            if (!map[layer]) { map[layer] = { layer, items: [] }; groups.push(map[layer]); }
+            map[layer].items.push({ seal, sIdx });
         });
-        container.innerHTML = parts;
+        const rank = g => { const m = /^Lớp\s*(\d+)/i.exec(g.layer); return m ? parseInt(m[1], 10) : 99; };
+        groups.sort((a, b) => rank(a) - rank(b));
+        let html = '', shown = 0;
+        groups.forEach(g => {
+            let cards = '', total = 0, empty = 0, matched = 0;
+            g.items.forEach(({ seal, sIdx }) => {
+                const activeArr = extractActiveSealsFromPosition(seal);
+                total += activeArr.length;
+                if (!activeArr.length) empty++;
+                if (filter && !(String(seal.name || '').toLowerCase().includes(filter) || activeArr.some(c => c.toLowerCase().includes(filter)))) return;
+                matched++;
+                cards += renderPositionCard(seal, sIdx, activeArr);
+            });
+            if (!matched) return;
+            shown += matched;
+            const open = filter ? true : (layerOpen[g.layer] !== false);
+            html += `<details class="space-y-3" ${open ? 'open' : ''} data-layer="${escAttr(g.layer)}" ontoggle="if(!positionFilterText.trim()) layerOpen[this.dataset.layer]=this.open">
+                <summary class="cursor-pointer select-none bg-indigo-100 text-indigo-900 font-bold text-sm px-3 py-2.5 rounded-lg flex flex-wrap justify-between items-center gap-1">
+                    <span>${esc(g.layer)}</span>
+                    <span class="text-[11px] font-semibold">${g.items.length} vị trí · ${total} chì${empty ? ` · <span class="text-amber-700">⚠️ ${empty} trống</span>` : ''}</span>
+                </summary>
+                <div class="space-y-3 pt-3">${cards}</div>
+            </details>`;
+        });
+        container.innerHTML = shown ? html : `<p class="text-center text-gray-400 py-6 text-xs bg-white rounded-xl">Không có vị trí hoặc số chì nào khớp "${esc(positionFilterText)}".</p>`;
     }
 
     function getDefaultParticipants() {
@@ -2953,22 +3178,20 @@
         document.getElementById('updateSealImgName').textContent = 'Chưa chọn ảnh.';
         const container = document.getElementById('currentSealsCheckboxList');
         container.innerHTML = '';
-        let currentList = extractActiveSealsFromPosition(seal);
+        let currentList = extractActiveSealsFromPosition(seal).filter(c => ownedSealCodes(seal).has(c));
         if (currentList.length > 0) {
             currentList.forEach(code => {
                 container.innerHTML += `
-                    <label class="flex items-center gap-2 ${ownedSealCodes(seal).has(code) ? 'cursor-pointer' : 'opacity-50 cursor-not-allowed'} bg-white p-2 rounded border shadow-sm">
-                        <input type="checkbox" name="oldSealCheckbox" value="${escAttr(code)}" class="rounded text-red-600 w-4 h-4" ${ownedSealCodes(seal).has(code) ? '' : 'disabled'}>
-                        <span class="font-bold text-gray-800">Hủy con chì: <b class="text-red-600">${esc(code)}</b>${ownedSealCodes(seal).has(code) ? '' : ' 🔒'}</span>
+                    <label class="flex items-center gap-2 cursor-pointer bg-white p-2 rounded border shadow-sm">
+                        <input type="checkbox" name="oldSealCheckbox" value="${escAttr(code)}" class="rounded text-red-600 w-4 h-4" >
+                        <span class="font-bold text-gray-800">Hủy con chì: <b class="text-red-600">${esc(code)}</b></span>
                     </label>
                 `;
             });
-            if (!isAdmin() && currentList.some(c => !ownedSealCodes(seal).has(c))) {
-                container.innerHTML += `<p class="text-[10px] text-gray-500 mt-1">🔒 Chì bị khóa: chỉ admin, hoặc chính người thêm trong vòng 30 phút, mới được thay/tháo.</p>`;
-            }
         } else {
             container.innerHTML = `<span class="text-gray-400 italic">Vị trí chưa có số chì nào.</span>`;
         }
+        { const pre = selectedSeals[sealIdx]; if (pre) container.querySelectorAll('input[type=checkbox]').forEach(cb => { if (pre.has(cb.value) && !cb.disabled) cb.checked = true; }); }
         liveSealCheck('inputNewSeal', 'updateSealLiveWarn');
         document.getElementById('updateSealModal').classList.remove('hidden');
     }
@@ -3031,6 +3254,7 @@
             const locNoRp = loc.number;
             saveItem('loco', loc, null, { sensitive: true }).then(() => {
                 closeModal('updateSealModal');
+                clearSealSelection();
                 renderDetailView(loc);
                 offerUndo('✅ Đã thay chì' + (pr.changed ? ` (gỡ ${pr.changed} dòng lịch sử cũ)` : ''), { loco: locNoRp }, () => {
                     const i = locomotives.findIndex(l => l.number === locNoRp);
@@ -3058,22 +3282,20 @@
         document.getElementById('removeSealReason').value = 'Tháo dỡ định kỳ';
         const container = document.getElementById('removeSealsCheckboxList');
         container.innerHTML = '';
-        let currentList = extractActiveSealsFromPosition(seal);
+        let currentList = extractActiveSealsFromPosition(seal).filter(c => ownedSealCodes(seal).has(c));
         if (currentList.length > 0) {
             currentList.forEach(code => {
                 container.innerHTML += `
-                    <label class="flex items-center gap-2 ${ownedSealCodes(seal).has(code) ? 'cursor-pointer' : 'opacity-50 cursor-not-allowed'} bg-white p-2 rounded border shadow-sm">
-                        <input type="checkbox" name="removeSealCheckbox" value="${escAttr(code)}" class="rounded text-red-600 w-4 h-4" ${ownedSealCodes(seal).has(code) ? '' : 'disabled'}>
-                        <span class="font-bold text-gray-800">Tháo: <b class="text-red-600">${esc(code)}</b>${ownedSealCodes(seal).has(code) ? '' : ' 🔒'}</span>
+                    <label class="flex items-center gap-2 cursor-pointer bg-white p-2 rounded border shadow-sm">
+                        <input type="checkbox" name="removeSealCheckbox" value="${escAttr(code)}" class="rounded text-red-600 w-4 h-4" >
+                        <span class="font-bold text-gray-800">Tháo: <b class="text-red-600">${esc(code)}</b></span>
                     </label>
                 `;
             });
-            if (!isAdmin() && currentList.some(c => !ownedSealCodes(seal).has(c))) {
-                container.innerHTML += `<p class="text-[10px] text-gray-500 mt-1">🔒 Chì bị khóa: chỉ admin, hoặc chính người thêm trong vòng 30 phút, mới được thay/tháo.</p>`;
-            }
         } else {
             container.innerHTML = `<span class="text-gray-400 italic">Không có chì để tháo.</span>`;
         }
+        { const pre = selectedSeals[sealIdx]; if (pre) container.querySelectorAll('input[type=checkbox]').forEach(cb => { if (pre.has(cb.value) && !cb.disabled) cb.checked = true; }); }
         document.getElementById('removeSealModal').classList.remove('hidden');
     }
 
@@ -3142,6 +3364,7 @@
         const locNoRm = loc.number;
         saveItem('loco', loc, null, { sensitive: true }).then(() => {
             closeModal('removeSealModal');
+            clearSealSelection();
             renderDetailView(loc);
             offerUndo(`🗑️ Đã tháo ${selectedToRemove.length} chì` + (pr.changed ? ` (gỡ ${pr.changed} dòng lịch sử cũ)` : ''), { loco: locNoRm }, () => {
                 const i = locomotives.findIndex(l => l.number === locNoRm);
@@ -3232,7 +3455,7 @@
                             <span class="font-bold bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded">📅 ${escText(h.date)}</span>
                             <div class="flex gap-1 items-center">
                                 <span class="text-[10px] bg-indigo-900 text-white px-2 py-0.5 rounded font-semibold">${escText(h.positionName)}</span>
-                                ${canModifyEntry(h) ? `<button onclick="openEditHistoryModal(${h.sealIdx}, ${h.histIdx})" class="text-blue-600 bg-blue-50 px-2.5 py-1 rounded font-semibold">✏️ Sửa</button>` : '<span class="text-[10px] text-gray-400 px-1">🔒</span>'}
+                                ${canModifyEntry(h) ? `<button onclick="openEditHistoryModal(${h.sealIdx}, ${h.histIdx})" class="text-blue-600 bg-blue-50 px-2.5 py-1 rounded font-semibold">✏️ Sửa</button>` : ''}
                             </div>
                         </div>
                         <p class="text-emerald-700 font-bold">✅ Mới: ${escText(h.newSeal)}</p>
@@ -3272,7 +3495,7 @@
                             <span class="font-bold bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded">📅 ${escText(h.date)}</span>
                             <div class="flex gap-1">
                                 ${canModifyEntry(h) ? `<button onclick="openEditHistoryModal(${sealIdx}, ${hIdx})" class="text-blue-600 bg-blue-50 px-2.5 py-1 rounded font-semibold">✏️ Sửa</button>
-                                <button onclick="promptDeleteHistory(${sealIdx}, ${hIdx})" class="text-red-600 bg-red-50 px-2.5 py-1 rounded font-bold">🗑️ Xóa</button>` : '<span class="text-[10px] text-gray-400 px-1">🔒 Khóa</span>'}
+                                <button onclick="promptDeleteHistory(${sealIdx}, ${hIdx})" class="text-red-600 bg-red-50 px-2.5 py-1 rounded font-bold">🗑️ Xóa</button>` : ''}
                             </div>
                         </div>
                         <p class="text-emerald-700 font-bold">✅ Mới: ${escText(h.newSeal)}</p>
@@ -3995,31 +4218,45 @@
     /* PWA: nút Cài app, đăng ký service worker, xin lưu trữ bền vững */
     (function () {
         var deferred = null;
-        var btn = document.getElementById('btnInstallPwa');
+        var btns = document.querySelectorAll('.js-install-btn');
+        function showBtns(show) { btns.forEach(function (b) { b.classList.toggle('hidden', !show); }); }
         function isStandalone() {
             return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
         }
         window.addEventListener('beforeinstallprompt', function (e) {
             e.preventDefault();
             deferred = e;
-            if (btn && !isStandalone()) btn.classList.remove('hidden');
+            if (!isStandalone()) showBtns(true);
         });
         window.addEventListener('appinstalled', function () {
             deferred = null;
-            if (btn) btn.classList.add('hidden');
+            showBtns(false);
         });
         window.installPwa = function () {
             if (!deferred) return;
             deferred.prompt();
             deferred.userChoice.then(function () {
                 deferred = null;
-                if (btn) btn.classList.add('hidden');
+                showBtns(false);
             });
         };
         // Service worker chỉ chạy được trên https:// (hoặc localhost), không chạy khi mở file trực tiếp
         if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+            window.showUpdateBanner = function () {
+                if (document.getElementById('updateBanner')) return;
+                var el = document.createElement('div');
+                el.id = 'updateBanner';
+                el.className = 'no-print fixed left-2 right-2 bottom-16 md:bottom-4 md:left-auto md:right-4 md:w-80 bg-indigo-900 text-white rounded-xl shadow-2xl p-3 flex items-center justify-between gap-3 text-xs';
+                el.style.zIndex = '250';
+                el.innerHTML = '<span>🆕 Có bản mới của app.</span><button type="button" class="bg-white text-indigo-900 font-bold px-3 py-1.5 rounded-lg" onclick="location.reload()">Tải lại</button>';
+                document.body.appendChild(el);
+            };
             window.addEventListener('load', function () {
-                navigator.serviceWorker.register('sw.js').catch(function () {});
+                var hadController = !!navigator.serviceWorker.controller;
+                navigator.serviceWorker.addEventListener('controllerchange', function () { if (hadController) window.showUpdateBanner(); });
+                navigator.serviceWorker.register('sw.js').then(function (reg) {
+                    document.addEventListener('visibilitychange', function () { if (!document.hidden) reg.update().catch(function () {}); });
+                }).catch(function () {});
             });
         }
         // Đề nghị trình duyệt không tự xóa dữ liệu ngoại tuyến khi máy thiếu bộ nhớ

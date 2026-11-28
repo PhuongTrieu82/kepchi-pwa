@@ -2,17 +2,17 @@
    Chỉ làm 2 việc: giữ bản sao giao diện (để mở được khi mất mạng) và giữ bản sao
    các thư viện Tailwind/Firebase. KHÔNG đụng tới dữ liệu: mọi kết nối Firebase
    Realtime Database, IndexedDB, localStorage đều đi thẳng như cũ. */
-const VERSION = 'v16.8';
+const VERSION = 'v16.10';
 const SHELL_CACHE = 'kepchi-shell-' + VERSION;
 const LIB_CACHE = 'kepchi-libs-v1';   // thư viện bên ngoài, giữ qua các phiên bản
 const SHELL = [
     './',
     './index.html',
     './manifest.webmanifest',
-    './icons/icon-192.png',
-    './icons/icon-512.png',
-    './icons/apple-touch-icon.png',
-    './icons/favicon-48.png'
+    './icon-192.png',
+    './icon-512.png',
+    './apple-touch-icon.png',
+    './favicon-48.png'
 ];
 const LIB_HOSTS = ['cdn.tailwindcss.com', 'www.gstatic.com'];
 
